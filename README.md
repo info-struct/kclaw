@@ -1,25 +1,27 @@
 # KClaw
 
-**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI.
+![Kclawlogo](C:\Users\gryan\Documents\Kclawlogo.jpg)
 
-Running in production on k3s (PicoCluster, ARM). 
+**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support comming soon)
+
+Running in production on k3s (X_86, Graviton, RaspberryPI). 
 ---
 
 ## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  Kubernetes Cluster (openclaw namespace)                  │
-│                                                           │
+│  Kubernetes Cluster (kclaw namespace)                    │
+│                                                          │
 │  ┌─────────────────┐   ┌─────────────────────────────┐   │
 │  │  KClaw Admin UI │   │  Orchestrator               │   │
-│  │  (kclaw-admin-  │   │  - Channels (Slack, Telegram)│   │
+│  │  (kclaw-admin-  │   │  - Channels (Slack, DM)     │   │
 │  │   ui.local)     │   │  - Message routing          │   │
 │  │  - Dashboard    │   │  - Pod lifecycle management │   │
 │  │  - IAM / RBAC   │   │  - Task scheduler + CronJob │   │
 │  │  - Tenants      │   │  - Admin API (port 3002)    │   │
 │  │  - Teams        │   └────────────┬────────────────┘   │
-│  │  - MCP servers  │                │ HTTP POST /message  │
+│  │  - MCP servers  │                │ HTTP POST /message │
 │  │  - Vault        │                ↓                    │
 │  │  - Sessions     │   ┌────────────────────────────┐    │
 │  └────────┬────────┘   │  Agent Pod (per group)     │    │
@@ -30,8 +32,8 @@ Running in production on k3s (PicoCluster, ARM).
 │  │  CredRouter     │←──│  - POST /reload endpoint   │    │
 │  │  - IAM (JWT)    │   └────────────────────────────┘    │
 │  │  - Tenant vault │                                     │
-│  │  - Team config  │   External: api.anthropic.com       │
-│  │  - MCP configs  │                                     │
+│  │  - Team config  │   LiteLLM:  api.anthropic.com /     │
+│  │  - MCP configs  │             bedrock.aws.com         │
 │  │  - Token limits │                                     │
 │  └─────────────────┘                                     │
 └──────────────────────────────────────────────────────────┘
@@ -48,21 +50,21 @@ Running in production on k3s (PicoCluster, ARM).
 
 ---
 
-## What's Working
+## Features
 
 **Messaging**
-- Slack and Telegram channels
+- Slack DM and Slack channels
 - Persistent agent pods — session context kept in memory across messages
 - First message: ~21s (pod creation + startup). Subsequent: ~3–5s
 
 **Credential & Config Management (CredRouter)**
-- JWT-authenticated admin UI and user portal
+- Admin UI and user portal
 - Per-tenant and per-team encrypted vault
 - Team-scoped MCP server registry
 - Config merge: Global < Team < User
 - Credentials delivered to agent pods at startup via ServiceAccount token
 
-**Admin UI** (`http://kclaw-admin-ui.local`)
+Admin UI
 - Dashboard: health, token spend, active pods, activity feed
 - Tenant management: vault, MCP toggles, token budgets, usage charts
 - Team management: create teams, assign members, provision PVCs
@@ -71,84 +73,145 @@ Running in production on k3s (PicoCluster, ARM).
 - IAM: invite flow, RBAC (admin / team_lead / user), SAML SSO
 
 **Scheduled Tasks**
+
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
 - Kubernetes CronJob executes due tasks every minute (scales to any number of users)
 - `/loop` command working end-to-end
 
 **MCP Servers**
+
 - stdio (npx, node) and SSE transports
 - Registered per-team or per-tenant via Admin UI
 - Vault keys injected into agent `process.env` — MCP subprocesses inherit them
 - Live reload without pod restart via **Sessions → Reload Config**
 
 **Persona & CLAUDE.md**
+
 - Users set personal AI instructions via `/my-settings → Persona`
 - Admins set team instructions via tenant `CLAUDE_MD_CONTENT` config key
 - Both written to `/workspace/group/CLAUDE.md` at pod startup (combined when both set)
 
 ---
 
-## Quick Start
+## Getting started
 
-See **[specs/FIRST_INSTALL.md](specs/FIRST_INSTALL.md)** for the full step-by-step guide.
 
-Short version:
-
-```bash
-# 1. Namespace + registry secret
-kubectl create namespace openclaw
-kubectl create secret docker-registry regcred \
-  --docker-server=https://index.docker.io/v1/ \
-  --docker-username=YOUR_USERNAME \
-  --docker-password=YOUR_PASSWORD \
-  -n openclaw
-
-# 2. Generate secrets
-ENCRYPTION_KEY=$(openssl rand -base64 32)
-JWT_SECRET=$(openssl rand -base64 48)
-ADMIN_TOKEN=$(openssl rand -hex 32)
-
-kubectl create secret generic credrouter-secrets \
-  -n openclaw \
-  --from-literal=encryption-key="$ENCRYPTION_KEY" \
-  --from-literal=jwt-secret="$JWT_SECRET"
-
-kubectl create secret generic kclaw-admin-ui-secrets \
-  -n openclaw \
-  --from-literal=jwt-secret="$JWT_SECRET" \
-  --from-literal=credrouter-admin-token="$ADMIN_TOKEN"
-
-# 3. Deploy
-sudo docker build -t gryanfawcett/kubeclaw-credrouter:latest ./src/credrouter && \
-  sudo docker push gryanfawcett/kubeclaw-credrouter:latest
-kubectl apply -k k8s/credrouter/
-
-kubectl apply -f k8s/service-account.yaml
-kubectl apply -f k8s/kubeclaw-orchestrator.yaml
-
-sudo docker build -t gryanfawcett/kclaw-admin-ui:latest ./admin-ui && \
-  sudo docker push gryanfawcett/kclaw-admin-ui:latest
-kubectl apply -f k8s/admin-ui/
-
-# 4. Ensure agent image is set on orchestrator
-kubectl set env deployment/kubeclaw-orchestrator -n openclaw \
-  CONTAINER_IMAGE=gryanfawcett/kubeclaw-agent:latest
-
-# 5. Bootstrap first admin
-kubectl port-forward -n openclaw svc/credrouter 8080:80 &
-ADMIN_TOKEN=$(kubectl get secret kclaw-admin-ui-secrets -n openclaw \
-  -o jsonpath='{.data.credrouter-admin-token}' | base64 -d)
-echo "y" | CREDROUTER_URL=http://127.0.0.1:8080 CREDROUTER_ADMIN_TOKEN=$ADMIN_TOKEN \
-  npx tsx src/admin/cli.ts iam bootstrap your@email.com --name "Your Name"
-kill %1
-
-# 6. /etc/hosts
-echo "<node-ip> kclaw-admin-ui.local kubeclaw-admin.local" | sudo tee -a /etc/hosts
-```
-
-Open `http://kclaw-admin-ui.local` and log in with the bootstrapped credentials.
 
 ---
+
+## Setting up slack bot
+
+1. Register the App on Slack
+
+
+
+- Go to the [Slack API Portal](https://api.slack.com/apps?new_app=1).
+- Click **Create New App** and select **From scratch**.
+- Enter your app name and select your target Slack workspace.
+- Click **Create App**. [[1](https://api.slack.com/apps?new_app=1), [2](https://www.youtube.com/watch?v=Fnj7Qq8AHnw&t=72), [3](https://medium.com/applied-data-science/how-to-build-you-own-slack-bot-714283fd16e5), [4](https://www.sprinklr.com/help/articles/slack/how-to-create-a-slack-bot/6543460bb1f59867f3be1ba2)]
+- Configure Permissions and Scopes
+
+- Navigate to **OAuth & Permissions** in the left sidebar.
+- Scroll down to **Scopes** and add `Bot Token Scopes` like `chat:write` (to send messages) and `channels:read`.
+- Scroll back up and click **Install to Workspace**, then authorize the app.
+- Copy your **Bot User OAuth Token** (`xoxb-...`) and keep it secret. [[1](https://medium.com/applied-data-science/how-to-build-you-own-slack-bot-714283fd16e5), [2](https://www.youtube.com/watch?v=uycMHMBAShc&t=210), [3](https://www.sprinklr.com/help/articles/slack/how-to-create-a-slack-bot/6543460bb1f59867f3be1ba2)]
+- Write and Host Your Bot Code
+
+- Set up a project using a framework like Slack's Bolt for Python or Node.js.
+- Store your `SLACK_BOT_TOKEN` and `SLACK_SIGNING_SECRET` safely in environment variables.
+- Listen for incoming events (like mentions or direct messages) or set up a Request URL via Event Subscriptions.
+- Deploy your code to a hosting provider or use Socket Mode so Slack can communicate with your local or cloud application securely
+
+To setup slack you need to have a couple sites handy and generated a bot app and application key
+
+1: goto https://api.slack.com/apps and create a new app name it G-eves for your Ai Assistant
+
+Create the App-level Token typically starts with xapp-??????????
+
+2: Also an oauth level token
+
+xoxb-?????????????????
+
+
+
+Apply the following app manifest to app.slack.com to your G-eves application 
+
+```
+{
+    "display_information": {
+        "name": "G-eves",
+        "description": "Personal AI Assistant"
+    },
+    "features": {
+        "app_home": {
+            "home_tab_enabled": false,
+            "messages_tab_enabled": true,
+            "messages_tab_read_only_enabled": false
+        },
+        "bot_user": {
+            "display_name": "G-eves",
+            "always_online": true
+        },
+        "slash_commands": [
+            {
+                "command": "/reload",
+                "description": "reloads config",
+                "should_escape": false
+            },
+            {
+                "command": "/reset",
+                "description": "Clears the context",
+                "should_escape": false
+            }
+        ]
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "users:read.email",
+                "channels:history",
+                "channels:read",
+                "chat:write",
+                "commands",
+                "files:read",
+                "files:write",
+                "groups:history",
+                "groups:read",
+                "im:history",
+                "im:read",
+                "users:read"
+            ]
+        },
+        "pkce_enabled": false
+    },
+    "settings": {
+        "event_subscriptions": {
+            "bot_events": [
+                "message.channels",
+                "message.groups",
+                "message.im"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false,
+        "is_mcp_enabled": false
+    }
+}
+```
+
+
+
+## Installing backend
+
+
+
+
+
+
 
 ## Onboarding a User
 
@@ -169,52 +232,10 @@ Open `http://kclaw-admin-ui.local` and log in with the bootstrapped credentials.
 
 ---
 
-## Rebuilding After Code Changes
-
-```bash
-# CredRouter
-sudo docker build -t gryanfawcett/kubeclaw-credrouter:latest ./src/credrouter
-sudo docker push gryanfawcett/kubeclaw-credrouter:latest
-kubectl rollout restart deployment/credrouter -n openclaw
-
-# Admin UI
-sudo docker build -t gryanfawcett/kclaw-admin-ui:latest ./admin-ui
-sudo docker push gryanfawcett/kclaw-admin-ui:latest
-kubectl rollout restart deployment/kclaw-admin-ui -n openclaw
-
-# Orchestrator
-./build-orchestrator.sh
-sudo docker push gryanfawcett/kubeclaw-orchestrator:latest
-kubectl rollout restart deployment/kubeclaw-orchestrator -n openclaw
-
-# Agent
-cd container && ./build.sh
-sudo docker tag kubeclaw-agent:latest gryanfawcett/kubeclaw-agent:latest
-sudo docker push gryanfawcett/kubeclaw-agent:latest
-kubectl delete pods -n openclaw -l app=kubeclaw-agent  # recreated on next message
-```
-
----
-
-## Documentation
-
-| Document | Purpose |
-|----------|---------|
-| [specs/FIRST_INSTALL.md](specs/FIRST_INSTALL.md) | Full step-by-step first install |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Current deployment status + common issues |
-| [docs/ADMIN_README.md](docs/ADMIN_README.md) | Admin API & CLI: setup, commands, operations |
-| [admin-ui/SETUP.md](admin-ui/SETUP.md) | Admin UI gotchas and local dev |
-| [docs/CREDROUTER.md](docs/CREDROUTER.md) | CredRouter architecture & API reference |
-| [docs/LITELLM.md](docs/LITELLM.md) | LiteLLM proxy: model routing, virtual keys |
-| [docs/MCP_OAUTH_GUIDE.md](docs/MCP_OAUTH_GUIDE.md) | Adding OAuth-backed MCP servers end-to-end |
-| [BUILD_CONTAINERS.md](BUILD_CONTAINERS.md) | Building agent and orchestrator images |
-
----
-
 ## Requirements
 
-- Kubernetes 1.24+ (tested on k3s on ARM)
-- Namespace: `openclaw`
+- Kubernetes 1.24+ (tested on k3s on ARM and X86 ) 
+- Namespace: `kclaw`
 - Orchestrator node selector: `kubernetes.io/hostname` (agents pin to same node for hostPath access)
 - Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
 
@@ -222,10 +243,10 @@ kubectl delete pods -n openclaw -l app=kubeclaw-agent  # recreated on next messa
 
 ## License
 
-**KubeClaw Community License v1.0**
+**KubeClaw FSL ALv2" 
 
-- Free for personal and small business use (up to 10 tenants)
+- Free for personal and small business use (up to 30 agents/tenents)
 - No selling, leasing, or sub-licensing as a standalone product
-- Enterprise license required for >10 tenants or commercial SaaS use
+- Enterprise license required for >30 tenants or commercial SaaS use
 
 See [LICENSE](LICENSE) for full terms.
