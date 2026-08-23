@@ -1,6 +1,6 @@
 # KClaw
 
-![Application Screenshot](/blob/main/Images/Kclawlogo-small.png)
+![Application Screenshot](Images/Kclawlogo-small.png)
 
 
 
