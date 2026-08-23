@@ -4,39 +4,40 @@
 
 **Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support coming soon)
 
-Running in production on k3s (X_86, Graviton, RaspberryPI). 
+Running in production on k3s (X_86, Graviton, Raspberry PI 5). 
 ---
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  Kubernetes Cluster (kclaw namespace)                    │
-│                                                          │
-│  ┌─────────────────┐   ┌─────────────────────────────┐   │
-│  │  KClaw Admin UI │   │  Orchestrator               │   │
-│  │  (kclaw-admin-  │   │  - Channels (Slack, DM)     │   │
-│  │   ui.local)     │   │  - Message routing          │   │
-│  │  - Dashboard    │   │  - Pod lifecycle management │   │
-│  │  - IAM / RBAC   │   │  - Task scheduler + CronJob │   │
-│  │  - Tenants      │   │  - Admin API (port 3002)    │   │
-│  │  - Teams        │   └────────────┬────────────────┘   │
-│  │  - MCP servers  │                │ HTTP POST /message │
-│  │  - Vault        │                ↓                    │
-│  │  - Sessions     │   ┌────────────────────────────┐    │
-│  └────────┬────────┘   │  Agent Pod (per group)     │    │
-│           │            │  - Claude Agent SDK        │    │
-│           │ REST       │  - HTTP server :3000       │    │
-│           ↓            │  - MCP servers (stdio/SSE) │    │
-│  ┌─────────────────┐   │  - Session ID in memory    │    │
-│  │  CredRouter     │←──│  - POST /reload endpoint   │    │
-│  │  - IAM (JWT)    │   └────────────────────────────┘    │
-│  │  - Tenant vault │                                     │
-│  │  - Team config  │   LiteLLM:  api.anthropic.com /     │
-│  │  - MCP configs  │             bedrock.aws.com         │
-│  │  - Token limits │                                     │
-│  └─────────────────┘                                     │
-└──────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Kubernetes Cluster (openclaw namespace)                                │
+│                                                                         │
+│  ┌─────────────────┐   ┌───────────────────────────────────────────┐    │
+│  │  KClaw Admin UI │   │  Orchestrator                             │    │
+│  │  (kclaw-admin-  │   │  - Channels (Slack, Telegram)             │    │
+│  │   ui.local)     │   │  - Message routing & Pod lifecycle        │    │
+│  │  - Dashboard    │   │  - Task scheduler + CronJob               │    │
+│  │  - IAM / RBAC   │   │  - Real-time Observability (K8s Watch API)│    │
+│  │  - Tenants      │   │  - Admin API (port 3002)                  │    │
+│  │  - Teams        │   └────────────┬──────────────────────────────┘    │
+│  │  - MCP servers  │                │ HTTP POST /message                │
+│  │  - Vault        │                ↓                                   │
+│  │  - Sessions     │   ┌───────────────────────────────────────────┐    │
+│  └────────┬────────┘   │  Agent Pod (per user/group)               │    │
+│           │            │  - Claude Agent SDK & HTTP server :3000   │    │
+│           │ REST       │  - MCP servers (stdio/SSE)                │    │
+│           ↓            │  - Local SQLite Storage (gtd.db)          │    │
+│  ┌─────────────────┐   │  - POST /reload endpoint                  │    │
+│  │  CredRouter     │←──┤  ┌─────────────────────────────────────┐  │    │
+│  │  - IAM (JWT)    │   │  │ Shared PVCs (subPath mounts)        │  │    │
+│  │  - Tenant vault │   │  │ - Team Skills                       │  │    │
+│  │  - Team config  │   │  │ - Private Agent State               │  │    │
+│  │  - MCP configs  │   │  └─────────────────────────────────────┘  │    │
+│  │  - Token limits │   └───────────────────────────────────────────┘    │
+│  └─────────────────┘                                                    │
+│                        External APIs: api.anthropic.com, etc.           │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Components
@@ -58,22 +59,23 @@ Running in production on k3s (X_86, Graviton, RaspberryPI).
 
 ## Features
 
-**Messaging**
+**Messaging & Intelligence**
 
-- Slack DM and Slack channels
+- Slack and Telegram channels
+- **Native Document Support:** Full support for `application/pdf` parsing routed dynamically to Claude 3.5/4.x document blocks
 - Persistent agent pods — session context kept in memory across messages
 - First message: ~21s (pod creation + startup). Subsequent: ~3–5s
 
 **Credential & Config Management (CredRouter)**
 
-- Admin UI and user portal
+- JWT-authenticated admin UI and user portal
 - Per-tenant and per-team encrypted vault
 - Team-scoped MCP server registry
 - Config merge: Global < Team < User
-- Credentials delivered to agent pods at startup via Service Account token
-- Oauth proxy and management interface
+- Credentials delivered to agent pods at startup via ServiceAccount token
 
-Admin UI
+**Admin UI** (`http://kclaw-admin-ui.local`)
+
 - Dashboard: health, token spend, active pods, activity feed
 - Tenant management: vault, MCP toggles, token budgets, usage charts
 - Team management: create teams, assign members, provision PVCs
@@ -81,29 +83,24 @@ Admin UI
 - Sessions: list, inspect, invalidate, kill, **Reload Config** (live credential push)
 - IAM: invite flow, RBAC (admin / team_lead / user), SAML SSO
 
+**Data, Storage & Skills**
+
+- Local `gtd.db` (SQLite) per agent pod for durable GTD task tracking
+- Team-shared dynamic PersistentVolumeClaims (`subPath` mounts) for private agent state
+- Native Skill Repositories loaded seamlessly from folder mappings
+
+**Routing & Observability**
+
+- **Intelligent Notifications:** Automated dispatch and worker routing via Agent Teams
+- **Log Streaming:** Real-time cluster logging and observability via the K8s Watch API
+- **Strict Security:** Fully hardened against vulnerability chains (npm audits, lock files, Dependabot)
+- **Node 22 Baseline:** Entire platform runs on strict Node 22 LTS engines
+
 **Scheduled Tasks**
 
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
 - Kubernetes CronJob executes due tasks every minute (scales to any number of users)
 - `/loop` command working end-to-end
-- Team Virtual Employ SOP and Persona based tasks
-
-**MCP Servers**
-
-- stdio (npx, node) and SSE transports
-- Registered per-team or per-tenant via Admin UI
-- Vault keys injected into agent `process.env` — MCP subprocesses inherit them
-- Live reload without pod restart via **Sessions → Reload Config**
-
-**Persona & CLAUDE.md**
-
-- Users set personal AI instructions via `/my-settings → Persona`
-- Admins set team instructions via tenant `CLAUDE_MD_CONTENT` config key
-- Both written to `/workspace/group/CLAUDE.md` at pod startup (combined when both set)
-
----
-
-## Getting started
 
 ---
 
