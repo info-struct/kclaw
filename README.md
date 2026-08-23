@@ -1,12 +1,12 @@
 # KClaw
 
-![Application Screenshot](/blob/main/Images/Kclawlogo-small.png)
+![Application Screenshot](Images/Kclawlogo-small.png)
 
 
 
 
 
-**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (OpenRouter support coming soon)
+**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support coming soon)
 
 Running in production on k3s (X_86, Graviton, Raspberry PI 5). 
 ---
