@@ -1,6 +1,10 @@
 # KClaw
 
-![Kclawlogo-small](C:\Users\gryan\Documents\Kclawlogo-small.png)
+![Application Screenshot](images/Kclawlogo-small.png)
+
+
+
+
 
 **Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support coming soon)
 
