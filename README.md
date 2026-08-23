@@ -1,8 +1,8 @@
 # KClaw
 
-![Kclawlogo](C:\Users\gryan\Documents\Kclawlogo.jpg)
+![Kclawlogo-small](C:\Users\gryan\Documents\Kclawlogo-small.png)
 
-**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support comming soon)
+**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support coming soon)
 
 Running in production on k3s (X_86, Graviton, RaspberryPI). 
 ---
@@ -48,21 +48,30 @@ Running in production on k3s (X_86, Graviton, RaspberryPI).
 | Admin UI | `gryanfawcett/kclaw-admin-ui:latest` | 3003 | `kclaw-admin-ui.local` |
 | Agent pods | `gryanfawcett/kubeclaw-agent:latest` | 3000 (internal) | — |
 
----
+## Requirements
+
+- Ubuntu 26.x Linux on AWS or RasberryPi Bookworm or latter. 
+- Kubernetes 1.24+ (tested on k3s on ARM and X86 ) 
+- Namespace: `kclaw`
+- Orchestrator node selector: `kubernetes.io/hostname` (agents pin to same node for hostPath access)
+- Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
 
 ## Features
 
 **Messaging**
+
 - Slack DM and Slack channels
 - Persistent agent pods — session context kept in memory across messages
 - First message: ~21s (pod creation + startup). Subsequent: ~3–5s
 
 **Credential & Config Management (CredRouter)**
+
 - Admin UI and user portal
 - Per-tenant and per-team encrypted vault
 - Team-scoped MCP server registry
 - Config merge: Global < Team < User
-- Credentials delivered to agent pods at startup via ServiceAccount token
+- Credentials delivered to agent pods at startup via Service Account token
+- Oauth proxy and management interface
 
 Admin UI
 - Dashboard: health, token spend, active pods, activity feed
@@ -77,6 +86,7 @@ Admin UI
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
 - Kubernetes CronJob executes due tasks every minute (scales to any number of users)
 - `/loop` command working end-to-end
+- Team Virtual Employ SOP and Persona based tasks
 
 **MCP Servers**
 
@@ -95,46 +105,24 @@ Admin UI
 
 ## Getting started
 
-
-
 ---
 
-## Setting up slack bot
+## Setting up slack 
 
-1. Register the App on Slack
+#### Go to the [Slack API Portal](https://api.slack.com/apps?new_app=1).
 
-
-
-- Go to the [Slack API Portal](https://api.slack.com/apps?new_app=1).
 - Click **Create New App** and select **From scratch**.
-- Enter your app name and select your target Slack workspace.
-- Click **Create App**. [[1](https://api.slack.com/apps?new_app=1), [2](https://www.youtube.com/watch?v=Fnj7Qq8AHnw&t=72), [3](https://medium.com/applied-data-science/how-to-build-you-own-slack-bot-714283fd16e5), [4](https://www.sprinklr.com/help/articles/slack/how-to-create-a-slack-bot/6543460bb1f59867f3be1ba2)]
-- Configure Permissions and Scopes
+- Enter your app name G-eves and select your target Slack workspace.
+- Click **Create App**. 
 
-- Navigate to **OAuth & Permissions** in the left sidebar.
-- Scroll down to **Scopes** and add `Bot Token Scopes` like `chat:write` (to send messages) and `channels:read`.
+- Get the app Token starts with xapp-???????????? and keep it for latter. 
+
 - Scroll back up and click **Install to Workspace**, then authorize the app.
-- Copy your **Bot User OAuth Token** (`xoxb-...`) and keep it secret. [[1](https://medium.com/applied-data-science/how-to-build-you-own-slack-bot-714283fd16e5), [2](https://www.youtube.com/watch?v=uycMHMBAShc&t=210), [3](https://www.sprinklr.com/help/articles/slack/how-to-create-a-slack-bot/6543460bb1f59867f3be1ba2)]
-- Write and Host Your Bot Code
+- Goto Oauth & Permission on the right side under Features
+- Copy your **Bot User OAuth Token** (`xoxb-...`) and keep it secret.
+- Now on the right click the App Manifest to configure your apps behavior. 
 
-- Set up a project using a framework like Slack's Bolt for Python or Node.js.
-- Store your `SLACK_BOT_TOKEN` and `SLACK_SIGNING_SECRET` safely in environment variables.
-- Listen for incoming events (like mentions or direct messages) or set up a Request URL via Event Subscriptions.
-- Deploy your code to a hosting provider or use Socket Mode so Slack can communicate with your local or cloud application securely
-
-To setup slack you need to have a couple sites handy and generated a bot app and application key
-
-1: goto https://api.slack.com/apps and create a new app name it G-eves for your Ai Assistant
-
-Create the App-level Token typically starts with xapp-??????????
-
-2: Also an oauth level token
-
-xoxb-?????????????????
-
-
-
-Apply the following app manifest to app.slack.com to your G-eves application 
+- Apply the following app manifest to app.slack.com to your G-eves application to give it permission to talk to the backend 
 
 ```
 {
@@ -203,47 +191,27 @@ Apply the following app manifest to app.slack.com to your G-eves application
 }
 ```
 
-
+- Go back to Oauth & Permissions and Reinstall your OAuth Token to your org by pressing Reinstall to button. 
 
 ## Installing backend
 
+You will need the following:
 
+- AWS access and secret keys for bedrock or anthropic api key
+- The Oauth Slack and App slack keys. 
+- Brave Search API key
+- Option OpenAI key for Wisperflow
+- Clone the repo https://github.com/info-struct/kclaw
 
+Run the following command tar -xvf kclaw-installer.tar.gz
 
+cd kclaw
 
-
-
-## Onboarding a User
-
-1. **Settings → IAM → Invite User** — set role, optionally link to a tenant, copy the link
-2. User accepts invite, receives temporary password, forced to change on first login
-3. If tenant wasn't linked at invite time: **Settings → IAM Users → Link** next to the user row (user must log out/in after)
-
----
-
-## Registering an MCP Server
-
-1. **Settings → MCP Server Rack** → select team → Register New MCP Server
-   - `stdio`: name, command (e.g. `npx`), args (e.g. `-y @example/weather-mcp`)
-   - `sse`: name, URL
-2. **Settings → Vault** → add the API key the MCP expects (e.g. `WEATHER_API_KEY`)
-3. The key is injected into the agent's environment — MCP subprocesses inherit it
-4. Use **Sessions → Reload Config** on a running session to push changes without restart
-
----
-
-## Requirements
-
-- Kubernetes 1.24+ (tested on k3s on ARM and X86 ) 
-- Namespace: `kclaw`
-- Orchestrator node selector: `kubernetes.io/hostname` (agents pin to same node for hostPath access)
-- Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
-
----
+sudo ./install.sh 
 
 ## License
 
-**KubeClaw FSL ALv2" 
+**KClaw FSL ALv2" 
 
 - Free for personal and small business use (up to 30 agents/tenents)
 - No selling, leasing, or sub-licensing as a standalone product
