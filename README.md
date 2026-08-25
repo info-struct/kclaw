@@ -2,11 +2,7 @@
 
 ![Application Screenshot](Images/Kclawlogo-small.png)
 
-
-
-
-
-**Kubernetes-native assistant.** Persistent agent pods, centralized credential management, multi-tenant IAM, and a full web admin UI. For family and small business up to 100 users using AWS and AWS Bedrock services. (Open router support coming soon)
+**Kubernetes-native assistant.** This is for when the small business or family needs a Chief of staff and researcher to help navigate there daily life. To bring tools like google email, calendar, drive and office via Personal AI assistant, as well as scripting automation and coding.  Personalized to each user and scales to 30 agents on limited hardware. 
 
 Running in production on k3s (X_86, Graviton, Raspberry PI 5). 
 ---
@@ -66,9 +62,10 @@ Running in production on k3s (X_86, Graviton, Raspberry PI 5).
 **Messaging & Intelligence**
 
 - Slack and Telegram channels
+- Wisper flow audio transcription on slack record function ( with api key )
 - **Native Document Support:** Full support for `application/pdf` parsing routed dynamically to Claude 3.5/4.x document blocks
 - Persistent agent pods — session context kept in memory across messages
-- First message: ~21s (pod creation + startup). Subsequent: ~3–5s
+- First message: ~35s (pod creation + startup). Subsequent: ~3–5s
 
 **Credential & Config Management (CredRouter)**
 
@@ -103,7 +100,7 @@ Running in production on k3s (X_86, Graviton, Raspberry PI 5).
 **Scheduled Tasks**
 
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
-- Kubernetes CronJob executes due tasks every minute (scales to any number of users)
+- UI Task scheduling and Management via team Virtual employee
 - `/loop` command working end-to-end
 
 ---
