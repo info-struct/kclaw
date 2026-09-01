@@ -215,4 +215,4 @@ sudo ./install.sh
 - No selling, leasing, or sub-licensing as a standalone product
 - Enterprise license required for >30 tenants or commercial SaaS use
 
-See [LICENSE](LICENSE) for full terms.
+See [LICENSE](https://github.com/info-struct/kclaw/blob/main/LICENSE.md) for full terms.
