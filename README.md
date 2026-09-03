@@ -87,6 +87,7 @@ Running in production on k3s (X_86, Graviton, Raspberry PI 5).
 **Data, Storage & Skills**
 
 - Local `gtd.db` (SQLite) per agent pod for durable GTD task tracking
+- Tiered Skill Architecture:  Separates core system workflows and shared global capabilities from fully isolated, per-channel environments, enabling secure, highly customized skill deployment without cross-contamination.
 - Team-shared dynamic PersistentVolumeClaims (`subPath` mounts) for private agent state
 - Native Skill Repositories loaded seamlessly from folder mappings
 
