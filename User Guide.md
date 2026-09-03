@@ -28,7 +28,7 @@ Find the microphone button see blow:
 
 Click record and record up to a 25mb audio file for transcription supported format are mp3, mp4, mpeg, mpga, m4a, wav, webm, flac, ogg, oga according to there website documentation. 
 
-![Mic-slack](Images\Mic-slack.png)
+![Application Screenshot](Images\Mic-slack.png)
 
 ### Shared skills management
 
