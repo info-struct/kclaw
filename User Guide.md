@@ -156,6 +156,17 @@ The Vault architecture natively understands K-Claw's multi-tenant design:
 All secret storage and token lifecycle management (such as OAuth token refreshes) are handled smoothly through the Admin UI:
 
 1. **Navigate to the Vault:** Log into the K-Claw Admin UI and open the **Vault / Credentials** section.
+
 2. **Select Scope:** Choose whether you are adding a credential at the **Global**, **Team** (e.g., `eng-01`), or **Personal** level.
+
 3. **Add the Secret:** Input the API key or trigger the OAuth flow for the desired integration. The Admin UI securely stores this data, encrypting it at rest within the Vault's backend database.
+
 4. **Seamless Agent Execution:** Once saved, you do not need to update agent `.env` files, inject K8s Secrets manually, or restart pods. The next time the agent executes a skill or MCP tool that requires that service, the Vault automatically handles the authentication routing on the fly.
+
+   
+
+### **Using Claude.md and Persona's**
+
+To get the most out of KClaw's persona system, approach the `CLAUDE.md` files as a structured, three-tier memory bank. The **Root-level file** (`/CLAUDE.md`) should be reserved exclusively for core developer instructions, system architecture, and contribution guidelines, as it is mounted read-only across all agent containers. For shared knowledge that needs to be accessible to everyone—such as company-wide facts, standardized workflows, or global operating procedures—use the **Global file** (`/groups/global/CLAUDE.md`), which agents can reference universally and update when explicitly instructed to "remember this globally."
+
+For day-to-day operations, rely heavily on the **Team and Personal-level files** (`/groups/{team_name}/CLAUDE.md`). These serve as the isolated "brain" for each specific channel (e.g., a private chat, a family WhatsApp, or an engineering Slack), storing unique formatting rules, custom trigger behaviors, and local conversation memories. Because these team environments are strictly sandboxed into their own read-write containers, you can highly customize each persona without risking cross-contamination, allowing the main channel agent to act as a lean dispatcher that seamlessly delegates heavy workloads to temporary worker pods.
