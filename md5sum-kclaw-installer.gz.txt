@@ -1,1 +1,1 @@
-f71e55bd0d54466fcddac0d6ae6bf768  kclaw-installer.tar.gz
+4a4dce62ab924d61ec20345d1bdc8acb  kclaw-installer.tar.gz
