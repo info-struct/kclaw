@@ -1,0 +1,202 @@
+# KubeClaw Helm Chart Values
+# ---------------------------------------------------------------------------
+# Secrets strategy
+# ---------------------------------------------------------------------------
+# By default (secrets.create: false) all secrets must be pre-created in the
+# namespace before installing the chart.  Required secrets:
+#   - credrouter-secrets         keys: encryption-key, jwt-secret
+#   - kclaw-admin-ui-secrets     keys: jwt-secret, credrouter-admin-token
+#   - kubeclaw-env               key:  .env  (channel token file)
+#   - regcred                    type: kubernetes.io/dockerconfigjson
+#
+# To have the chart create them, set secrets.create: true and fill in the
+# plaintext values below.  WARNING: values end up in Helm's release secret;
+# use an external-secrets operator for production.
+
+global:
+  # Name of the docker-registry pull secret used by all pods.
+  imagePullSecretName: regcred
+
+  # Tolerations applied to every pod — needed on single-node k3s where the
+  # control-plane node carries a NoSchedule taint.
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+# ---------------------------------------------------------------------------
+# CredRouter
+# ---------------------------------------------------------------------------
+credrouter:
+  image:
+    repository: YOUR_REGISTRY/kubeclaw-credrouter
+    tag: latest
+    pullPolicy: Always
+
+  # Name of the pre-existing secret that holds encryption-key and jwt-secret.
+  # Also used as the source for CREDROUTER_ADMIN_TOKEN (from kclaw-admin-ui-secrets).
+  existingSecretName: credrouter-secrets
+
+  # Pin to the node where the PVC lives (local-path storage is node-local).
+  nodeSelector:
+    kubernetes.io/hostname: pc4
+
+  port: 3001
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+  persistence:
+    size: 1Gi
+    storageClassName: local-path
+    # Set to the name of an existing PVC to skip chart-managed PVC creation.
+    # The live cluster uses credrouter-data-pc4 (node-pinned to pc4).
+    existingClaimName: credrouter-data-pc4
+
+# ---------------------------------------------------------------------------
+# Orchestrator
+# ---------------------------------------------------------------------------
+orchestrator:
+  image:
+    repository: YOUR_REGISTRY/kubeclaw-orchestrator
+    tag: latest
+    pullPolicy: Always
+
+  # Node where the hostPath workspace lives.
+  nodeSelector:
+    kubernetes.io/hostname: pc4
+
+  # Host-side path for the shared workspace volume.
+  hostPath: /mnt/data/kubeclaw
+
+  # Image the orchestrator launches for each agent pod.
+  agentImage:
+    repository: YOUR_REGISTRY/kubeclaw-agent
+    tag: latest
+
+  assistantName: Andy
+
+  ports:
+    credentialProxy: 8787
+    adminApi: 3002
+
+  # Pre-existing secret whose .env key is mounted at /app/.env (channel tokens).
+  existingEnvSecretName: kubeclaw-env
+
+  # Pre-existing secret for CREDROUTER_ADMIN_TOKEN.
+  existingAdminUiSecretsName: kclaw-admin-ui-secrets
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+# ---------------------------------------------------------------------------
+# Admin UI
+# ---------------------------------------------------------------------------
+adminUI:
+  image:
+    repository: YOUR_REGISTRY/kclaw-admin-ui
+    tag: latest
+    pullPolicy: Always
+
+  port: 3003
+
+  # LoadBalancer matches the live cluster (k3s assigns the node IPs).
+  # Use ClusterIP + ingress if you add TLS termination at the ingress layer.
+  serviceType: LoadBalancer
+
+  # Pin to the node where channel/workspace data lives.
+  nodeSelector:
+    kubernetes.io/hostname: pc4
+
+  # Set to "true" only when the ingress terminates TLS.
+  cookieSecure: "false"
+
+  # Pre-existing secret for JWT_SECRET and CREDROUTER_ADMIN_TOKEN.
+  existingSecretName: kclaw-admin-ui-secrets
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
+    hosts:
+      - kclaw-admin-ui.local
+      - admin-ui.kubeclaw.local
+
+# ---------------------------------------------------------------------------
+# Orchestrator Admin API ingress (separate from UI ingress)
+# ---------------------------------------------------------------------------
+adminApiIngress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - kubeclaw-admin.local
+    - admin.kubeclaw.local
+
+# ---------------------------------------------------------------------------
+# Task Executor CronJob
+# ---------------------------------------------------------------------------
+taskExecutor:
+  enabled: true
+  schedule: "* * * * *"
+  image:
+    repository: YOUR_REGISTRY/kubeclaw-orchestrator
+    tag: latest
+    pullPolicy: IfNotPresent
+  # Pre-existing secret whose keys are loaded as env vars in the CronJob.
+  existingEnvSecretName: kubeclaw-env
+
+# ---------------------------------------------------------------------------
+# Namespace creation (set to false if namespace is pre-created)
+# ---------------------------------------------------------------------------
+namespaceCreate: false
+
+# ---------------------------------------------------------------------------
+# Chart-managed secrets  (secrets.create: false by default)
+# ---------------------------------------------------------------------------
+secrets:
+  # Set to true to have the chart create all three secrets from the values below.
+  create: false
+
+  credrouter:
+    # openssl rand -base64 32
+    encryptionKey: ""
+    # openssl rand -base64 48  — shared with adminUiSecrets.jwtSecret
+    jwtSecret: ""
+
+  adminUiSecrets:
+    # Same JWT secret used by CredRouter
+    jwtSecret: ""
+    # openssl rand -hex 32
+    credRouterAdminToken: ""
+
+  # Channel tokens written verbatim into the .env key.
+  channelTokens:
+    slackBotToken: ""
+    slackAppToken: ""
+    telegramBotToken: ""
+    # Required for voice message transcription (Whisper API).
+    openaiApiKey: ""
