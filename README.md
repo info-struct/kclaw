@@ -61,6 +61,12 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 ## Features
 
+**Native Claude Code Skill Compatibility**
+
+- Any Anthropic-style Claude Code skill works natively out of the box
+- Full Claude Code skill ecosystem available without porting or adapting
+- Skills run inside isolated agent pods — no cross-contamination between users
+
 **Model Support (via LiteLLM)**
 
 - AWS Bedrock — Anthropic Claude, Titan, Llama
