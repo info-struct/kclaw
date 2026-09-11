@@ -2,9 +2,15 @@
 
 ![Application Screenshot](Images/Kclawlogo-small.png)
 
-**Kubernetes-native AI assistant harness.** This is for when the small business or family needs a Chief of staff and researcher to help navigate their daily life. Bringing tools like Google email, calendar, drive and office via a Personal AI assistant, as well as scripting automation and coding. Personalized to each user and scales to 30 agents on limited hardware.
+**IT-managed, multi-tenant AI assistant platform for small business and enterprise.** KClaw gives your team a Chief of Staff and researcher — integrating Google Workspace, Slack, Telegram, calendar, drive, and office tools via a personalized AI assistant per user. Scales to 30 agents on existing Kubernetes infrastructure, managed entirely by IT.
 
-**Model-agnostic via LiteLLM** — run any supported model without touching agent code: AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, etc.), Azure OpenAI, or any OpenAI-compatible endpoint. Production runs on AWS Bedrock; test instance uses Gemini 3.8 Flash via OpenRouter.
+Built for organizations that need **governance, data sovereignty, and cost control** — not a personal agent running on someone's workstation.
+
+**Why KClaw instead of Claude Managed Agents or Microsoft Copilot:**
+- **Data sovereignty** — runs on your infrastructure (on-prem, AWS, Raspberry Pi). Conversation data never leaves your cluster.
+- **Cost control** — free for up to 30 tenants under FSL-1.1. No per-seat SaaS fees. Pair with AWS Bedrock or OpenRouter to optimize model costs.
+- **IT governance** — full RBAC, SAML SSO, audit trails, token budgets per tenant, and credential vault managed by IT — not by individual users.
+- **Model-agnostic via LiteLLM** — AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, 100+ models), Azure OpenAI, or any OpenAI-compatible endpoint. No vendor lock-in.
 
 Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 ---
