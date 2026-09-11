@@ -2,9 +2,11 @@
 
 ![Application Screenshot](Images/Kclawlogo-small.png)
 
-**Kubernetes-native assistant.** This is for when the small business or family needs a Chief of staff and researcher to help navigate there daily life. To bring tools like google email, calendar, drive and office via Personal AI assistant, as well as scripting automation and coding.  Personalized to each user and scales to 30 agents on limited hardware. 
+**Kubernetes-native AI assistant harness.** This is for when the small business or family needs a Chief of staff and researcher to help navigate their daily life. Bringing tools like Google email, calendar, drive and office via a Personal AI assistant, as well as scripting automation and coding. Personalized to each user and scales to 30 agents on limited hardware.
 
-Running in production on k3s (Graviton, EC2, Raspberry PI 5). 
+**Model-agnostic via LiteLLM** — run any supported model without touching agent code: AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, etc.), Azure OpenAI, or any OpenAI-compatible endpoint. Production runs on AWS Bedrock; test instance uses Gemini 3.8 Flash via OpenRouter.
+
+Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 ---
 
 ## Architecture
@@ -36,7 +38,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 │  │  - MCP configs  │   │  └─────────────────────────────────────┘  │    │
 │  │  - Token limits │   └───────────────────────────────────────────┘    │
 │  └─────────────────┘                                                    │
-│                        External APIs: api.anthropic.com, etc.           │
+│                        LiteLLM → Bedrock / Anthropic API / OpenRouter / Azure    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -58,6 +60,14 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 - Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
 
 ## Features
+
+**Model Support (via LiteLLM)**
+
+- AWS Bedrock — Anthropic Claude, Titan, Llama
+- Anthropic API (direct)
+- OpenRouter — Gemini, Mistral, and 100+ models
+- Azure OpenAI and any OpenAI-compatible endpoint
+- Switch models via config — no agent code changes required
 
 **Messaging & Intelligence**
 
@@ -196,9 +206,13 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 You will need the following:
 
+<<<<<<< HEAD
 - AWS access and secret keys for bedrock or anthropic api key for bedrock
 - An OpenRouter api Key for open router backend.
 - Anthropic API key for anthropic native backend
+=======
+- LLM provider credentials — one of: AWS access/secret keys (Bedrock), Anthropic API key, or OpenRouter API key
+>>>>>>> aa1559b (docs: update README to reflect model-agnostic LiteLLM support)
 - The Oauth Slack and App slack keys. 
 - Brave Search API key
 - Option OpenAI key for Wisperflow
