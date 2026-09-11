@@ -104,7 +104,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 - Team management: create teams, assign members, provision PVCs
 - Settings: IAM users, team vault, MCP server rack (command/args/url), skill browser
 - Sessions: list, inspect, invalidate, kill, **Reload Config** (live credential push)
-- IAM: invite flow, RBAC (admin / team_lead / user), SAML SSO
+- IAM: invite flow, RBAC (admin / team_lead / user)
 
 **Data, Storage & Skills**
 
