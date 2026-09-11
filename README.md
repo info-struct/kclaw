@@ -11,7 +11,7 @@ Running in production on k3s (X_86, Graviton, Raspberry PI 5).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  Kubernetes Cluster (openclaw namespace)                                │
+│  Kubernetes Cluster (kclaw namespace)                                │
 │                                                                         │
 │  ┌─────────────────┐   ┌───────────────────────────────────────────┐    │
 │  │  KClaw Admin UI │   │  Orchestrator                             │    │
@@ -196,7 +196,9 @@ Running in production on k3s (X_86, Graviton, Raspberry PI 5).
 
 You will need the following:
 
-- AWS access and secret keys for bedrock or anthropic api key
+- AWS access and secret keys for bedrock or anthropic api key for bedrock
+- An OpenRouter api Key for open router backend.
+- Anthropic API key for anthropic native backend
 - The Oauth Slack and App slack keys. 
 - Brave Search API key
 - Option OpenAI key for Wisperflow
@@ -207,6 +209,94 @@ Run the following command tar -xvf kclaw-installer.tar.gz
 cd kclaw
 
 sudo ./install.sh 
+
+
+
+## After Install and setup 
+
+
+
+
+
+
+
+
+
+## K-Claw Team Setup Guide
+
+This guide covers how to set up Teams in the K-Claw Admin UI. Teams allow you to group tenants (users/bots), manage shared MCP servers, and configure team-level variables. K-Claw can automatically provision underlying Kubernetes Persistent Volume Claims (PVCs) for team-wide storage sharding.
+
+#### Creating a Team
+
+1. #### Navigate to the **Teams** section in the K-Claw Admin UI (`/admin/teams`).
+
+2. Click the **+ Create Team** button in the top right.
+
+3. Fill out the team details:
+
+   - **Team Name:** The human-readable name of the team (e.g., `Engineering` or `Marketing`).
+   - **Identifier:** The system identifier for the team. This must be lowercase letters, numbers, and hyphens only (e.g., `engineering`). This is used for internal routing and storage paths.
+   - **Provision Kubernetes PVC:** Ensure this checkbox is checked (it is checked by default). This triggers the cluster to provision a dedicated Persistent Volume Claim for this team's isolated storage.
+
+4. Click **Create Team**.
+
+### Post-Creation Notes
+
+- If the team is created successfully but the PVC fails to provision immediately (e.g., due to cluster resource limits), you will receive a "PVC warning". The team will still be created, but you may need to check the Kubernetes cluster events to resolve the storage binding.
+- Once created, you can click **Manage →** next to the team in the list to configure shared MCP servers and Config Keys for the team.
+
+
+
+
+
+## K-Claw User Provisioning Guide
+
+This guide explains how to invite and provision new users (and their associated agent tenants) using the K-Claw Admin UI Wizard.
+
+#### The Add User Wizard
+
+To onboard a new user, navigate to the **Settings** or **Users** area of the Admin UI and click to open the **Add User Wizard**. 
+
+The provisioning process handles Identity, Tenant (Bot) assignment, Provider setup, and Invite link generation in one streamlined flow.
+
+#### Step 1: User Details
+
+- **Name (optional):** The real name of the invitee (e.g., `Alice Smith`).
+- **Email (optional):** Entering the user's email allows K-Claw to automatically attempt to link their Slack identity if they will be using the Slack integration.
+- **Role:** Select `User`, `Team Lead`, or `Admin`.
+- **Expires In:** Choose how long the invite link will remain valid (1, 7, or 30 days).
+- **Platform:** Choose the user's primary interface platform (`Any / Not specified`, `Telegram`, or `Slack`).
+
+#### Step 2: Assign a Bot / Tenant
+
+You must decide how this user will interact with the system:
+
+- **No tenant:** Select this if creating an Admin or Observer account that doesn't need its own agent bot. (Skips to Step 5)
+- **Assign to an existing tenant:** Select this to grant the user access to a bot/tenant that is already running in the cluster. You will be prompted to select the tenant from a dropdown. (Skips to Step 5)
+- **Create a new tenant for this user:** Select this to provision a brand new agent bot specifically for this user. (Proceeds to Step 3)
+
+#### Step 3: Tenant Details (New Tenant Only)
+
+- **Bot / tenant name:** A friendly name for the agent (e.g., `Alice's Bot`).
+- **Identifier:** A URL-safe slug generated from the name (e.g., `alices-bot`). Used for internal routing and storage paths.
+- **Team (optional):** Assign the new tenant to a pre-existing Team (see `team-setup.md`). This grants the agent access to the team's shared PVC storage and MCP servers.
+
+#### Step 4: Model Provider (New Tenant Only)
+
+Configure the LLM provider for the new tenant. K-Claw provides presets to speed this up:
+
+- **Provider:** Choose between `LiteLLM (cluster proxy)` or `Anthropic (direct)`. 
+  - *Note: LiteLLM is the recommended default for cluster environments.*
+- **Model ID:** Defaults to `claude-sonnet-4-6`.
+- **Base URL:** If using LiteLLM, this defaults to the cluster-internal service URL (e.g., `http://litellm-service.default.svc.cluster.local:4000`).
+- **API Key:** Enter the provider API key (or LiteLLM proxy key). If you have system defaults configured, this will pre-populate.
+
+#### Step 5: Review & Send
+
+1. Review the summary of the invite, tenant assignment, and provider config.
+2. Click **Create & Send Invite**. 
+3. The system will provision the tenant in the Kubernetes cluster, configure the provider, and generate a unique invite link.
+4. Copy the generated invite link and send it to the user. Once they click it, their messaging platform will be linked to the newly provisioned tenant.
 
 ## License
 
