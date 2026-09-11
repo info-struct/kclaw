@@ -4,7 +4,7 @@
 
 **Kubernetes-native assistant.** This is for when the small business or family needs a Chief of staff and researcher to help navigate there daily life. To bring tools like google email, calendar, drive and office via Personal AI assistant, as well as scripting automation and coding.  Personalized to each user and scales to 30 agents on limited hardware. 
 
-Running in production on k3s (X_86, Graviton, Raspberry PI 5). 
+Running in production on k3s (Graviton, EC2, Raspberry PI 5). 
 ---
 
 ## Architecture
@@ -212,13 +212,18 @@ sudo ./install.sh
 
 
 
-## After Install and setup 
+## UI access and setup 
 
+For secure access to the UI I recommend using Cloudflared tunnels  you will be given the following information
 
+https://developers.cloudflare.com/tunnel/setup/
 
+1. Username of the admin user
+2. password for the admin user
+3. Internal url IP address that its listening too on port 3003
+4. list of all the keys for internal communication and setup in install-summary.txt
 
-
-
+Expose it via a traefik: https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/#tls
 
 
 
@@ -243,11 +248,10 @@ This guide covers how to set up Teams in the K-Claw Admin UI. Teams allow you to
 ### Post-Creation Notes
 
 - If the team is created successfully but the PVC fails to provision immediately (e.g., due to cluster resource limits), you will receive a "PVC warning". The team will still be created, but you may need to check the Kubernetes cluster events to resolve the storage binding.
+
 - Once created, you can click **Manage →** next to the team in the list to configure shared MCP servers and Config Keys for the team.
 
-
-
-
+  
 
 ## K-Claw User Provisioning Guide
 
