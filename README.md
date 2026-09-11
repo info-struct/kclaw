@@ -218,13 +218,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 You will need the following:
 
-<<<<<<< HEAD
-- AWS access and secret keys for bedrock or anthropic api key for bedrock
-- An OpenRouter api Key for open router backend.
-- Anthropic API key for anthropic native backend
-=======
 - LLM provider credentials — one of: AWS access/secret keys (Bedrock), Anthropic API key, or OpenRouter API key
->>>>>>> aa1559b (docs: update README to reflect model-agnostic LiteLLM support)
 - The Oauth Slack and App slack keys. 
 - Brave Search API key
 - Option OpenAI key for Wisperflow
