@@ -10,7 +10,7 @@ Built for organizations that need **governance, data sovereignty, and cost contr
 - **Data sovereignty** — runs on your infrastructure (on-prem, AWS, Raspberry Pi). Conversation data never leaves your cluster.
 - **Cost control** — free for up to 30 tenants under FSL-1.1. No per-seat SaaS fees. Pair with AWS Bedrock or OpenRouter to optimize model costs.
 - **IT governance** — full RBAC, SAML SSO, audit trails, token budgets per tenant, and credential vault managed by IT — not by individual users.
-- **Model-agnostic via LiteLLM** — AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, 100+ models), Azure OpenAI, or any OpenAI-compatible endpoint. No vendor lock-in.
+- **Model-agnostic via LiteLLM** — AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, 100+ models). No vendor lock-in.
 
 Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 ---
@@ -44,7 +44,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 │  │  - MCP configs  │   │  └─────────────────────────────────────┘  │    │
 │  │  - Token limits │   └───────────────────────────────────────────┘    │
 │  └─────────────────┘                                                    │
-│                        LiteLLM → Bedrock / Anthropic API / OpenRouter / Azure    │
+│                        LiteLLM → Bedrock / Anthropic API / OpenRouter           │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -78,7 +78,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 - AWS Bedrock — Anthropic Claude, Titan, Llama
 - Anthropic API (direct)
 - OpenRouter — Gemini, Mistral, and 100+ models
-- Azure OpenAI and any OpenAI-compatible endpoint
+- Any LiteLLM-supported provider
 - Switch models via config — no agent code changes required
 
 **Messaging & Intelligence**
