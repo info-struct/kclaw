@@ -9,7 +9,7 @@ Models evaluated for use as the primary LiteLLM model. All require 1M context, t
 | **MiniMax-M3** | Open-weight | 1M | ✅ | ❌ | $0.30 | $1.20 | Tested ✅ |
 | **GPT-5.6 Luna** | Frontier | 1M | ✅ | ✅ | $0.20 | $1.20 | Confirmed ✅ |
 | **Qwen3.8 Max** | Open-weight | 1M | ✅ | ❌ | TBC | TBC | Tested — PDFs fail via OpenRouter |
-| **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Not tested |
+| **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Confirmed ✅ |
 | **Kimi K3** | Open-weight | 1M | ✅ | ❌² | $2.38 | $13.30 | Not tested |
 | **Gemini 3.8 Flash** | Frontier | 1M | ✅ | ✅ | $0.75 | $3.75 | Confirmed ✅ |
 | **Claude Sonnet 4.6** | Frontier | 200K | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
@@ -35,5 +35,5 @@ Until that change is made, only single-model configs (Gemini 3.8 Flash, Sonnet 4
 
 - ~~GPT-5.6 Luna~~ — Confirmed ✅ text, images, PDFs all working
 - ~~Qwen3.8 Max~~ — PDFs fail via OpenRouter (Alibaba backend rejects document blocks)
-- Meta Muse Spark 1.3 — native PDF claims
+- ~~Meta Muse Spark 1.3~~ — Confirmed ✅ text, images, PDFs all working (requires 18+ attestation on OpenRouter)
 - Kimi K3 — verify image/PDF handling
