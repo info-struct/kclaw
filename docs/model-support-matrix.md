@@ -12,7 +12,7 @@ Models that fail any of these three are tracked in the matrix but do not have sa
 
 ---
 
-PDF column reflects native handling via the provider — not LiteLLM modality routing (see note below). Pricing as of Sep 12, 2026.
+PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026.
 
 ## OpenRouter
 
@@ -51,9 +51,4 @@ All configs below are single-model and handle text, images, and PDFs natively.
 | **Premium Bedrock Alt** | Bedrock | Sonnet 5 | $2.00 | $10.00 |
 | **Budget (Bedrock)** | Bedrock | GLM-5 | $1.00 | $3.20 |
 
-## PDF Routing Note
-
-LiteLLM `modality_routing: true` detects image blocks but **not** Anthropic `document` blocks. All two-model PDF configs require a ~10 line code change in `container/agent-runner/src/index-http-v2.ts` to detect PDF attachments and send `model: pdf-model` instead of `model: primary`.
-
-Until that change is made, only single-model configs handle PDFs reliably.
 
