@@ -52,15 +52,3 @@ LiteLLM `modality_routing: true` detects image blocks but **not** Anthropic `doc
 
 Until that change is made, only single-model configs handle PDFs reliably.
 
-## Models Still to Test
-
-### OpenRouter
-- ~~GPT-5.6 Luna~~ — Confirmed ✅ text, images, PDFs all working
-- ~~Qwen3.8 Max~~ — PDFs fail via OpenRouter (Alibaba backend rejects document blocks)
-- ~~Meta Muse Spark 1.3~~ — Confirmed ✅ text, images, PDFs all working
-- ~~Kimi K3~~ — Confirmed ✅ text, images, PDFs all working
-
-### AWS Bedrock
-- ~~Claude Sonnet 4.6~~ — Confirmed ✅ text, images, PDFs all working
-- ~~Claude Sonnet 5~~ — Confirmed ✅ text, images, PDFs all working
-- ~~GLM-5~~ — Confirmed ✅ text, images, PDFs all working
