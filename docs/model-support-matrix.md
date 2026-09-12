@@ -7,7 +7,7 @@ Models evaluated for use as the primary LiteLLM model. All require 1M context, t
 | **DeepSeek V4.1 Flash** | Open-weight | 1M | ❌ | ❌ | $0.07 | $0.28 | Tested — text only |
 | **GLM-5.3-Flash** | Open-weight | 1M | ✅ | ❌ | $0.15 | $0.50 | Tested ✅ |
 | **MiniMax-M3** | Open-weight | 1M | ✅ | ❌ | $0.30 | $1.20 | Tested ✅ |
-| **GPT-5.6 Luna** | Frontier | 1M | ✅ | ✅ | $0.20 | $1.20 | Not tested |
+| **GPT-5.6 Luna** | Frontier | 1M | ✅ | ✅ | $0.20 | $1.20 | Confirmed ✅ |
 | **Qwen3.8 Max** | Open-weight | 1M | ✅ | ✅¹ | TBC | TBC | Not tested |
 | **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Not tested |
 | **Kimi K3** | Open-weight | 1M | ✅ | ❌² | $2.38 | $13.30 | Not tested |
@@ -34,7 +34,7 @@ Until that change is made, only single-model configs (Gemini 3.8 Flash, Sonnet 4
 
 ## Models Still to Test
 
-- GPT-5.6 Luna — native PDF claims, very competitive pricing
+- ~~GPT-5.6 Luna~~ — Confirmed ✅ text, images, PDFs all working
 - Qwen3.8 Max — verify PDF handling via OpenRouter
 - Meta Muse Spark 1.3 — native PDF claims
 - Kimi K3 — verify image/PDF handling
