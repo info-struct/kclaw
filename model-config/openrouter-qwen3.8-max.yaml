@@ -1,0 +1,18 @@
+model_list:
+
+  - model_name: primary
+    litellm_params:
+      model: openrouter/qwen/qwen3.8-max-0902
+      api_key: os.environ/OPENROUTER_API_KEY
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 3
+  allowed_fails: 3
+  cooldown_time: 10
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
+  default_model: primary
