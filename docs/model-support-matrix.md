@@ -1,5 +1,17 @@
 # KClaw Model Support Matrix
 
+## Recommended Model Requirements
+
+When selecting a model for KClaw, we recommend all three modalities are supported natively by a single model:
+
+- **1M token context window** — agents accumulate long conversation histories, tool outputs, and file content. Anything less than 1M creates hard limits on complex workflows.
+- **Image support** — users regularly share screenshots, diagrams, and photos directly in chat.
+- **PDF support** — users share documents, reports, and invoices. PDF handling requires the model to process Anthropic `document` blocks natively via LiteLLM/OpenRouter or Bedrock. Many models claim PDF support but reject Anthropic document blocks in practice — see test results below.
+
+Models that fail any of these three are tracked in the matrix but do not have saved configs.
+
+---
+
 PDF column reflects native handling via the provider — not LiteLLM modality routing (see note below).
 
 ## OpenRouter
