@@ -10,6 +10,11 @@ model_list:
       model: openrouter/google/gemini-2.5-flash
       api_key: os.environ/OPENROUTER_API_KEY
 
+  - model_name: pdf-model
+    litellm_params:
+      model: openrouter/google/gemini-2.5-flash
+      api_key: os.environ/OPENROUTER_API_KEY
+
   # Auto-router named "primary" — client always sends model: primary
   # LiteLLM routes text to DeepSeek, images and PDFs to Gemini automatically
   - model_name: primary

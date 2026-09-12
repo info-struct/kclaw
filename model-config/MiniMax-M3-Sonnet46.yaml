@@ -10,6 +10,11 @@ model_list:
       model: openrouter/anthropic/claude-sonnet-4-6
       api_key: os.environ/OPENROUTER_API_KEY
 
+  - model_name: pdf-model
+    litellm_params:
+      model: openrouter/anthropic/claude-sonnet-4-6
+      api_key: os.environ/OPENROUTER_API_KEY
+
   # Auto-router named "primary" — client always sends model: primary
   # LiteLLM routes text to MiniMax-M3, images and PDFs to Claude Sonnet 4.6 automatically
   - model_name: primary
