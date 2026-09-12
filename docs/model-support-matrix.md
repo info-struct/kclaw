@@ -12,7 +12,7 @@ Models that fail any of these three are tracked in the matrix but do not have sa
 
 ---
 
-PDF column reflects native handling via the provider — not LiteLLM modality routing (see note below).
+PDF column reflects native handling via the provider — not LiteLLM modality routing (see note below). Pricing as of Sep 12, 2026.
 
 ## OpenRouter
 
@@ -34,7 +34,7 @@ PDF column reflects native handling via the provider — not LiteLLM modality ro
 |---|---|---|---|---|---|---|---|
 | **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
 | **Claude Sonnet 5** | Frontier | 1M | ✅ | ✅ | $2.00 | $10.00 | Confirmed ✅ |
-| **GLM-5** | Open-weight | TBC | ✅ | ✅ | TBC | TBC | Confirmed ✅ |
+| **GLM-5** | Open-weight | TBC | ✅ | ✅ | $1.00 | $3.20 | Confirmed ✅ |
 
 ## Recommended Deployment Configs
 
@@ -49,7 +49,7 @@ All configs below are single-model and handle text, images, and PDFs natively.
 | **Premium** | OpenRouter | Sonnet 4.6 | $3.00 | $15.00 |
 | **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | $3.00 | $15.00 |
 | **Premium Bedrock Alt** | Bedrock | Sonnet 5 | $2.00 | $10.00 |
-| **Budget (Bedrock)** | Bedrock | GLM-5 | TBC | TBC |
+| **Budget (Bedrock)** | Bedrock | GLM-5 | $1.00 | $3.20 |
 
 ## PDF Routing Note
 
