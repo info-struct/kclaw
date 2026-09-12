@@ -14,14 +14,14 @@ PDF column reflects native handling via the provider — not LiteLLM modality ro
 | **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Confirmed ✅ (requires 18+ attestation) |
 | **Kimi K3** | Open-weight | 1M | ✅ | ✅ | $2.38 | $13.30 | Confirmed ✅ |
 | **Gemini 3.8 Flash** | Frontier | 1M | ✅ | ✅ | $0.75 | $3.75 | Confirmed ✅ |
-| **Claude Sonnet 4.6** | Frontier | 200K | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
+| **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
 
 ## AWS Bedrock
 
 | Model | Type | Context | Images | PDFs | Cost In | Cost Out | Status |
 |---|---|---|---|---|---|---|---|
-| **Claude Sonnet 4.6** | Frontier | 200K | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
-| **Claude Sonnet 5** | Frontier | 200K | ✅ | ✅ | $2.00 | $10.00 | Confirmed ✅ |
+| **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
+| **Claude Sonnet 5** | Frontier | 1M | ✅ | ✅ | $2.00 | $10.00 | Confirmed ✅ |
 | **GLM-5** | Open-weight | TBC | ✅ | ✅ | TBC | TBC | Confirmed ✅ |
 
 ## Recommended Deployment Configs
