@@ -22,7 +22,7 @@ PDF column reflects native handling via the provider — not LiteLLM modality ro
 |---|---|---|---|---|---|---|---|
 | **Claude Sonnet 4.6** | Frontier | 200K | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
 | **Claude Sonnet 5** | Frontier | 200K | ✅ | ✅ | $2.00 | $10.00 | Confirmed ✅ |
-| **GLM-5** | Open-weight | TBC | TBC | TBC | TBC | TBC | Not tested |
+| **GLM-5** | Open-weight | TBC | ✅ | ✅ | TBC | TBC | Confirmed ✅ |
 
 ## Recommended Deployment Configs
 
@@ -51,4 +51,4 @@ Until that change is made, only single-model configs handle PDFs reliably.
 ### AWS Bedrock
 - ~~Claude Sonnet 4.6~~ — Confirmed ✅ text, images, PDFs all working
 - ~~Claude Sonnet 5~~ — Confirmed ✅ text, images, PDFs all working
-- GLM-5 — not yet tested on Bedrock
+- ~~GLM-5~~ — Confirmed ✅ text, images, PDFs all working
