@@ -8,13 +8,12 @@ Models evaluated for use as the primary LiteLLM model. All require 1M context, t
 | **GLM-5.3-Flash** | Open-weight | 1M | ✅ | ❌ | $0.15 | $0.50 | Tested ✅ |
 | **MiniMax-M3** | Open-weight | 1M | ✅ | ❌ | $0.30 | $1.20 | Tested ✅ |
 | **GPT-5.6 Luna** | Frontier | 1M | ✅ | ✅ | $0.20 | $1.20 | Confirmed ✅ |
-| **Qwen3.8 Max** | Open-weight | 1M | ✅ | ✅¹ | TBC | TBC | Not tested |
+| **Qwen3.8 Max** | Open-weight | 1M | ✅ | ❌ | TBC | TBC | Tested — PDFs fail via OpenRouter |
 | **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Not tested |
 | **Kimi K3** | Open-weight | 1M | ✅ | ❌² | $2.38 | $13.30 | Not tested |
 | **Gemini 3.8 Flash** | Frontier | 1M | ✅ | ✅ | $0.75 | $3.75 | Confirmed ✅ |
 | **Claude Sonnet 4.6** | Frontier | 200K | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
 
-¹ Qwen3.8 Max claims document/chart parsing but PDF via OpenRouter unverified  
 ² Kimi K3 supports text+images+video — no PDF mention on OpenRouter
 
 ## Recommended Deployment Configs
@@ -35,6 +34,6 @@ Until that change is made, only single-model configs (Gemini 3.8 Flash, Sonnet 4
 ## Models Still to Test
 
 - ~~GPT-5.6 Luna~~ — Confirmed ✅ text, images, PDFs all working
-- Qwen3.8 Max — verify PDF handling via OpenRouter
+- ~~Qwen3.8 Max~~ — PDFs fail via OpenRouter (Alibaba backend rejects document blocks)
 - Meta Muse Spark 1.3 — native PDF claims
 - Kimi K3 — verify image/PDF handling
