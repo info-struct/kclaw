@@ -38,13 +38,18 @@ PDF column reflects native handling via the provider — not LiteLLM modality ro
 
 ## Recommended Deployment Configs
 
-| Config | Provider | Primary | PDF | Cost (est.) | Needs Code Change |
-|---|---|---|---|---|---|
-| **Budget** | OpenRouter | GPT-5.6 Luna | Built-in | $0.20/$1.20 | No |
-| **Balanced** | OpenRouter | Meta Muse Spark 1.3 | Built-in | $1.25/$4.25 | No |
-| **Single-model safe** | OpenRouter | Gemini 3.8 Flash | Built-in | $0.75/$3.75 | No |
-| **Premium** | OpenRouter | Sonnet 4.6 | Built-in | $3.00/$15.00 | No |
-| **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | Built-in | $3.00/$15.00 | No |
+All configs below are single-model and handle text, images, and PDFs natively.
+
+| Config | Provider | Model | Cost In | Cost Out |
+|---|---|---|---|---|
+| **Budget** | OpenRouter | GPT-5.6 Luna | $0.20 | $1.20 |
+| **Balanced** | OpenRouter | Gemini 3.8 Flash | $0.75 | $3.75 |
+| **Balanced+** | OpenRouter | Meta Muse Spark 1.3 | $1.25 | $4.25 |
+| **Performance** | OpenRouter | Kimi K3 | $2.38 | $13.30 |
+| **Premium** | OpenRouter | Sonnet 4.6 | $3.00 | $15.00 |
+| **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | $3.00 | $15.00 |
+| **Premium Bedrock Alt** | Bedrock | Sonnet 5 | $2.00 | $10.00 |
+| **Budget (Bedrock)** | Bedrock | GLM-5 | TBC | TBC |
 
 ## PDF Routing Note
 
