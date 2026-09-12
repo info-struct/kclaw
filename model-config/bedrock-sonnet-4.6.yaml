@@ -1,0 +1,20 @@
+model_list:
+
+  - model_name: primary
+    litellm_params:
+      model: bedrock/us.anthropic.claude-sonnet-4-6-20251001-v1:0
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+      aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+      aws_region_name: os.environ/AWS_REGION_NAME
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 3
+  allowed_fails: 3
+  cooldown_time: 10
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
+  default_model: primary
