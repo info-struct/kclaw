@@ -1,0 +1,36 @@
+model_list:
+
+  - model_name: deepseek-primary
+    litellm_params:
+      model: openrouter/deepseek/deepseek-v4.1-flash
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: haiku
+    litellm_params:
+      model: openrouter/anthropic/claude-haiku-4-5
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # Auto-router named "primary" — client always sends model: primary
+  # LiteLLM routes simple text to DeepSeek V4.1 Flash, complex/images/PDFs to Haiku 4.5
+  - model_name: primary
+    litellm_params:
+      model: auto_router/complexity_router
+      complexity_router_config:
+        tiers:
+          SIMPLE: deepseek-primary
+          COMPLEX: haiku
+        modality_routing: true
+        classification_mode: user_turn
+      complexity_router_default_model: deepseek-primary
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 3
+  allowed_fails: 3
+  cooldown_time: 10
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
+  default_model: primary
