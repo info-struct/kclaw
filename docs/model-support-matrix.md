@@ -18,6 +18,7 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 
 | Model | Type | Context | Images | PDFs | Cost In | Cost Out | Status |
 |---|---|---|---|---|---|---|---|
+| **GLM-5V-Turbo** | Open-weight | 1M | ✅ | ✅² | TBC | TBC | Confirmed ✅ (PDFs via Haiku routing) |
 | **DeepSeek V4.1 Flash** | Open-weight | 1M | ❌ | ❌ | $0.07 | $0.28 | Tested — text only |
 | **GLM-5.3-Flash** | Open-weight | 1M | ✅ | ❌ | $0.15 | $0.50 | Tested — PDFs fail via OpenRouter |
 | **MiniMax-M3** | Open-weight | 1M | ✅ | ❌ | $0.30 | $1.20 | Tested — PDFs fail via OpenRouter |
@@ -27,6 +28,8 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 | **Kimi K3** | Open-weight | 1M | ✅ | ✅ | $2.38 | $13.30 | Confirmed ✅ |
 | **Gemini 3.8 Flash** | Frontier | 1M | ✅ | ✅ | $0.75 | $3.75 | Confirmed ✅ |
 | **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
+
+² GLM-5V-Turbo PDFs route to Haiku 4.5 via complexity_router COMPLEX tier — no code change required.
 
 ## AWS Bedrock
 
@@ -38,17 +41,16 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 
 ## Recommended Deployment Configs
 
-All configs below are single-model and handle text, images, and PDFs natively.
-
-| Config | Provider | Model | Cost In | Cost Out |
-|---|---|---|---|---|
-| **Budget** | OpenRouter | GPT-5.6 Luna | $0.20 | $1.20 |
-| **Balanced** | OpenRouter | Gemini 3.8 Flash | $0.75 | $3.75 |
-| **Balanced+** | OpenRouter | Meta Muse Spark 1.3 | $1.25 | $4.25 |
-| **Performance** | OpenRouter | Kimi K3 | $2.38 | $13.30 |
-| **Premium** | OpenRouter | Sonnet 4.6 | $3.00 | $15.00 |
-| **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | $3.00 | $15.00 |
-| **Premium Bedrock Alt** | Bedrock | Sonnet 5 | $2.00 | $10.00 |
-| **Budget (Bedrock)** | Bedrock | GLM-5 | $1.00 | $3.20 |
+| Config | Provider | Primary | PDF Model | Cost In | Cost Out |
+|---|---|---|---|---|---|
+| **Budget** | OpenRouter | GPT-5.6 Luna | Built-in | $0.20 | $1.20 |
+| **Budget Two-Model** | OpenRouter | GLM-5V-Turbo | Haiku 4.5 | TBC | TBC |
+| **Balanced** | OpenRouter | Gemini 3.8 Flash | Built-in | $0.75 | $3.75 |
+| **Balanced+** | OpenRouter | Meta Muse Spark 1.3 | Built-in | $1.25 | $4.25 |
+| **Performance** | OpenRouter | Kimi K3 | Built-in | $2.38 | $13.30 |
+| **Premium** | OpenRouter | Sonnet 4.6 | Built-in | $3.00 | $15.00 |
+| **Budget (Bedrock)** | Bedrock | GLM-5 | Built-in | $1.00 | $3.20 |
+| **Premium Bedrock Alt** | Bedrock | Sonnet 5 | Built-in | $2.00 | $10.00 |
+| **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | Built-in | $3.00 | $15.00 |
 
 
