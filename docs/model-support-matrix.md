@@ -32,6 +32,8 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 
 ## AWS Bedrock
 
+> **Note:** Non-Claude models on Bedrock are incompatible with the Claude Code SDK — extended thinking params sent by the SDK conflict with third-party model APIs. Bedrock is Claude-only for KClaw.
+
 | Model | Type | Context | Images | PDFs | Cost In | Cost Out | Status |
 |---|---|---|---|---|---|---|---|
 | **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
