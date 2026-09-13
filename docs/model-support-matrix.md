@@ -21,7 +21,7 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 | **GLM-5V-Turbo** | Open-weight | 1M | ✅ | ✅² | $1.20 | $4.00 | Confirmed ✅ (PDFs via Haiku routing) |
 | **DeepSeek V4.1 Flash** | Open-weight | 1M | ✅² | ✅² | $0.07 | $0.28 | Confirmed ✅ (images/PDFs via Haiku routing) |
 | **GLM-5.3-Flash** | Open-weight | 1M | ✅ | ✅² | $0.15 | $0.50 | Confirmed ✅ (PDFs via Haiku routing) |
-| **Qwen3.8 Max** | Open-weight | 1M | ✅ | ✅² | TBC | TBC | Confirmed ✅ (PDFs via Haiku routing) |
+| **Qwen3.8 Max** | Open-weight | 1M | ✅ | ✅² | $2.00 | $6.00 | Confirmed ✅ (PDFs via Haiku routing) |
 | **GPT-5.6 Luna** | Frontier | 1M | ✅ | ✅ | $0.20 | $1.20 | Confirmed ✅ |
 | **Meta Muse Spark 1.3** | Open-weight | 1M | ✅ | ✅ | $1.25 | $4.25 | Confirmed ✅ (requires 18+ attestation) |
 | **Kimi K3** | Open-weight | 1M | ✅ | ✅ | $2.38 | $13.30 | Confirmed ✅ |
@@ -45,7 +45,7 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 | **Ultra Budget Two-Model** | OpenRouter | DeepSeek V4.1 Flash | Haiku 4.5 | $0.07 | $0.28 |
 | **Budget Two-Model** | OpenRouter | GLM-5V-Turbo | Haiku 4.5 | $1.20 | $4.00 |
 | **Budget Two-Model Alt** | OpenRouter | GLM-5.3-Flash | Haiku 4.5 | $0.15 | $0.50 |
-| **Balanced Two-Model** | OpenRouter | Qwen3.8 Max | Haiku 4.5 | TBC | TBC |
+| **Balanced Two-Model** | OpenRouter | Qwen3.8 Max | Haiku 4.5 | $2.00 | $6.00 |
 | **Budget** | OpenRouter | GPT-5.6 Luna | Built-in | $0.20 | $1.20 |
 | **Balanced** | OpenRouter | Gemini 3.8 Flash | Built-in | $0.75 | $3.75 |
 | **Balanced+** | OpenRouter | Meta Muse Spark 1.3 | Built-in | $1.25 | $4.25 |
