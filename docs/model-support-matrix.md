@@ -36,7 +36,6 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 |---|---|---|---|---|---|---|---|
 | **Claude Sonnet 4.6** | Frontier | 1M | ✅ | ✅ | $3.00 | $15.00 | Confirmed ✅ |
 | **Claude Sonnet 5** | Frontier | 1M | ✅ | ✅ | $2.00 | $10.00 | Confirmed ✅ |
-| **GLM-5** | Open-weight | TBC | ✅ | ✅ | $1.00 | $3.20 | Confirmed ✅ |
 
 ## Recommended Deployment Configs
 
@@ -51,7 +50,6 @@ PDF column reflects native handling via the provider. Pricing as of Sep 12, 2026
 | **Balanced+** | OpenRouter | Meta Muse Spark 1.3 | Built-in | $1.25 | $4.25 |
 | **Performance** | OpenRouter | Kimi K3 | Built-in | $2.38 | $13.30 |
 | **Premium** | OpenRouter | Sonnet 4.6 | Built-in | $3.00 | $15.00 |
-| **Budget (Bedrock)** | Bedrock | GLM-5 | Built-in | $1.00 | $3.20 |
 | **Premium Bedrock Alt** | Bedrock | Sonnet 5 | Built-in | $2.00 | $10.00 |
 | **Premium (Bedrock)** | Bedrock | Sonnet 4.6 | Built-in | $3.00 | $15.00 |
 
