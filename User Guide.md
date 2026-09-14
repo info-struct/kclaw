@@ -24,7 +24,7 @@
 
 #### Using Wisper flow inside of Slack: 
 
-Find the microphone button see blow:
+Find the microphone button see below:
 
 Click record and record up to a 25mb audio file for transcription supported format are mp3, mp4, mpeg, mpga, m4a, wav, webm, flac, ogg, oga according to there website documentation. 
 
@@ -54,34 +54,34 @@ Because the agent's `/workspace/team-skills/` directory is mapped directly to th
 
 Prerequisites: gog CLI installed (v0.37.0+), a Google account, and access to Google Cloud Console at [console.cloud.google.com](http://console.cloud.google.com).
 
-​	**Step 1: Create a Google Cloud Project and OAuth Credentials**
+	**Step 1: Create a Google Cloud Project and OAuth Credentials**
 
-​	Go to [console.cloud.google.com](http://console.cloud.google.com) and create a new project or use an existing one. Enable the Gmail API and Google Calendar 	API under APIs and Services. Then go to APIs and Services, Credentials, and click Create Credentials and choose OAuth client 	ID. Select Desktop app as the application type and download the credentials JSON file.
+	Go to [console.cloud.google.com](http://console.cloud.google.com) and create a new project or use an existing one. Enable the Gmail API and Google Calendar 	API under APIs and Services. Then go to APIs and Services, Credentials, and click Create Credentials and choose OAuth client 	ID. Select Desktop app as the application type and download the credentials JSON file.
 
-​	**Step 2: Store the Credentials**
+	**Step 2: Store the Credentials**
 
-​	Run: gog auth credentials set ~/Downloads/client_secret_xxx.json
+	Run: gog auth credentials set ~/Downloads/client_secret_xxx.json
 
-​	In headless or agent environments you also need to set: export GOG_KEYRING_PASSWORD="your-password-here"
+	In headless or agent environments you also need to set: export GOG_KEYRING_PASSWORD="your-password-here"
 
-​	**Step 3: Authorize Your Google Account**
+	**Step 3: Authorize Your Google Account**
 
-​	Run: gog auth add [you@gmail.com](mailto:you@gmail.com)
+	Run: gog auth add [you@gmail.com](mailto:you@gmail.com)
 
-​	This opens a browser OAuth flow. Sign in and grant permissions. If you are in a headless environment with no browser 	    	available, add the --manual flag.
+	This opens a browser OAuth flow. Sign in and grant permissions. If you are in a headless environment with no browser 	    	available, add the --manual flag.
 
-​	**Step 4: Set Your Default Account**
+	**Step 4: Set Your Default Account**
 
-​	Run: export GOG_ACCOUNT=you@gmail.com
+	Run: export GOG_ACCOUNT=you@gmail.com
 
-​	Add this to your .bashrc or environment config to persist it across sessions.
+	Add this to your .bashrc or environment config to persist it across sessions.
 
-​	**Step 5: Verify It's Working**
+	**Step 5: Verify It's Working**
 
-​	Test Gmail with asking to run the following command: gog gmail labels list
-​	Test Calendar with asking to run the following command with: gog calendar list --days 7
+	Test Gmail with asking to run the following command: gog gmail labels list
+	Test Calendar with asking to run the following command with: gog calendar list --days 7
 
-​	For Agent or CI Environments
+	For Agent or CI Environments
 
 If you already have a refresh token available as an environment variable, you can skip the browser flow entirely by running: gog auth credentials set /path/to/creds.json followed by: gog auth import --email=you@gmail.com --refresh-token-env=GOOGLE_REFRESH_TOKEN
 
@@ -109,6 +109,7 @@ To diagnose any issues run: gog auth doctor
 
 
 
+*Coming soon.*
 
 ### Virtual employee SOP  
 

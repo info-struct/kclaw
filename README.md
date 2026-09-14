@@ -324,7 +324,7 @@ Configure the LLM provider for the new tenant. K-Claw provides presets to speed 
 
 ## License
 
-**KClaw FSL ALv2" 
+**KClaw FSL-1.1-ALv2**
 
 - Free for personal and small business use (up to 30 agents/tenents)
 - No selling, leasing, or sub-licensing as a standalone product
