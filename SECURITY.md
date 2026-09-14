@@ -4,7 +4,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Email: [gryanfawcett@gmail.com](mailto:gryanfawcett@gmail.com)
+Email: [ryan@info-struct.net](mailto:ryan@info-struct.net)
 
 Include:
 - Description of the vulnerability
