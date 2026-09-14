@@ -4,6 +4,7 @@
 *.pem
 *.key
 secrets/
+install-summary.txt
 
 # Node
 node_modules/

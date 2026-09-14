@@ -216,34 +216,54 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 ## Installing backend
 
-You will need the following:
+Before you begin, collect:
 
-- LLM provider credentials — one of: AWS access/secret keys (Bedrock), Anthropic API key, or OpenRouter API key
-- The Oauth Slack and App slack keys. 
-- Brave Search API key
-- Option OpenAI key for Wisperflow
-- Clone the repo https://github.com/info-struct/kclaw
+- **LLM provider credentials** — one of: AWS Access Key ID + Secret + Region (Bedrock), Anthropic API key, or OpenRouter API key
+- **Slack tokens** — Bot Token (`xoxb-…`) and App Token (`xapp-…`)
+- **Telegram token** — from @BotFather (if using Telegram)
+- **Brave Search API key**
+- **OpenAI API key** — optional, required for Whisper voice transcription
+- **Admin email and display name** — for the Admin UI login
 
-Run the following command tar -xvf kclaw-installer.tar.gz
+The installer (`kclaw-installer.tar.gz`) is included in this repository. Extract and run it on your target server:
 
+```bash
+# Clone the repo
+git clone https://github.com/info-struct/kclaw
 cd kclaw
 
-sudo ./install.sh 
+# Extract the installer
+tar -xvf kclaw-installer.tar.gz
+cd kubeclaw-installer
 
+# Run the interactive installer as root
+sudo ./scripts/install.sh
+```
 
+The installer will prompt for your credentials and automatically provision k3s, Helm, LiteLLM, PostgreSQL, and all KClaw components.
 
-## UI access and setup 
+**Verify the installer tarball before running it:**
+```bash
+md5sum -c ../md5sum-kclaw-installer.gz.txt
+```
 
-For secure access to the UI I recommend using Cloudflared tunnels  you will be given the following information
+## UI access and setup
 
-https://developers.cloudflare.com/tunnel/setup/
+When the installer completes, it writes an `install-summary.txt` file in the installer directory. This file contains all generated secrets, your admin credentials, and internal service URLs. **Keep this file secure and do not commit it** — it is automatically added to `.gitignore`.
 
-1. Username of the admin user
-2. password for the admin user
-3. Internal url IP address that its listening too on port 3003
-4. list of all the keys for internal communication and setup in install-summary.txt
+```
+ADMIN_UI_URL=http://<your-node-ip>
+ADMIN_EMAIL=you@example.com
+ADMIN_TEMP_PASSWORD=<generated>
+LITELLM_MASTER_KEY=<generated>
+...
+```
 
-Expose it via a traefik: https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/#tls
+For external access, expose the Admin UI (port 3003) using one of:
+- **Cloudflare Tunnel** (recommended): https://developers.cloudflare.com/tunnel/setup/
+- **Traefik ingress with TLS**: https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/#tls
+
+Change your admin password on first login.
 
 
 
