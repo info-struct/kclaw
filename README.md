@@ -133,7 +133,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 #### Go to the [Slack API Portal](https://api.slack.com/apps?new_app=1).
 
 - Click **Create New App** and select **From scratch**.
-- Enter your app name G-eves and select your target Slack workspace.
+- Enter your app name (we suggest **G-eves** but you can use any name) and select your target Slack workspace.
 - Click **Create App**. 
 
 - Get the app Token starts with xapp-???????????? and keep it for latter. 
@@ -143,7 +143,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 - Copy your **Bot User OAuth Token** (`xoxb-...`) and keep it secret.
 - Now on the right click the App Manifest to configure your apps behavior. 
 
-- Apply the following app manifest to app.slack.com to your G-eves application to give it permission to talk to the backend 
+- Apply the following app manifest to your Slack application. Update the name fields if you chose a different name.
 
 ```
 {
