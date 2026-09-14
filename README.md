@@ -52,10 +52,10 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 | Component | Image | Port | Ingress |
 |-----------|-------|------|---------|
-| CredRouter | `gryanfawcett/kubeclaw-credrouter:latest` | 3001 (internal) | — |
-| Orchestrator | `gryanfawcett/kubeclaw-orchestrator:latest` | 8787, 3002 | `kubeclaw-admin.local` |
-| Admin UI | `gryanfawcett/kclaw-admin-ui:latest` | 3003 | `kclaw-admin-ui.local` |
-| Agent pods | `gryanfawcett/kubeclaw-agent:latest` | 3000 (internal) | — |
+| CredRouter | `YOUR_REGISTRY/kubeclaw-credrouter:latest` | 3001 (internal) | — |
+| Orchestrator | `YOUR_REGISTRY/kubeclaw-orchestrator:latest` | 8787, 3002 | `kubeclaw-admin.local` |
+| Admin UI | `YOUR_REGISTRY/kclaw-admin-ui:latest` | 3003 | `kclaw-admin-ui.local` |
+| Agent pods | `YOUR_REGISTRY/kubeclaw-agent:latest` | 3000 (internal) | — |
 
 ## Requirements
 
