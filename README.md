@@ -23,7 +23,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 │                                                                         │
 │  ┌─────────────────┐   ┌───────────────────────────────────────────┐    │
 │  │  KClaw Admin UI │   │  Orchestrator                             │    │
-│  │  (kclaw-admin-  │   │  - Channels (Slack)             │    │
+│  │  (kclaw-admin-  │   │  - Channels (Slack)                       │    │
 │  │   ui.local)     │   │  - Message routing & Pod lifecycle        │    │
 │  │  - Dashboard    │   │  - Task scheduler + CronJob               │    │
 │  │  - IAM / RBAC   │   │  - Real-time Observability (K8s Watch API)│    │
@@ -44,7 +44,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 │  │  - MCP configs  │   │  └─────────────────────────────────────┘  │    │
 │  │  - Token limits │   └───────────────────────────────────────────┘    │
 │  └─────────────────┘                                                    │
-│                        LiteLLM → Bedrock / Anthropic API / OpenRouter           │
+│                        LiteLLM → Bedrock / Anthropic API / OpenRouter   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -124,7 +124,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
 - UI Task scheduling and Management via team Virtual employee
-- `/loop` command working end-to-end
+  
 
 ---
 
