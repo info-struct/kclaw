@@ -2,7 +2,7 @@
 
 ![Application Screenshot](Images/Kclawlogo-small.png)
 
-**IT-managed, multi-tenant AI assistant platform for small business and enterprise.** KClaw gives your team a Chief of Staff and researcher — integrating Google Workspace, Slack, Telegram, calendar, drive, and office tools via a personalized AI assistant per user. Scales to 30 agents on existing Kubernetes infrastructure, managed entirely by IT.
+**IT-managed, multi-tenant AI assistant platform for small business and enterprise.** KClaw gives your team a Chief of Staff and researcher — integrating Google Workspace, Slack,calendar, drive, and office tools via a personalized AI assistant per user. Scales to 30 agents on existing Kubernetes infrastructure, managed entirely by IT.
 
 Built for organizations that need **governance, data sovereignty, and cost control** — not a personal agent running on someone's workstation.
 
@@ -23,7 +23,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 │                                                                         │
 │  ┌─────────────────┐   ┌───────────────────────────────────────────┐    │
 │  │  KClaw Admin UI │   │  Orchestrator                             │    │
-│  │  (kclaw-admin-  │   │  - Channels (Slack, Telegram)             │    │
+│  │  (kclaw-admin-  │   │  - Channels (Slack)             │    │
 │  │   ui.local)     │   │  - Message routing & Pod lifecycle        │    │
 │  │  - Dashboard    │   │  - Task scheduler + CronJob               │    │
 │  │  - IAM / RBAC   │   │  - Real-time Observability (K8s Watch API)│    │
@@ -220,7 +220,6 @@ Before you begin, collect:
 
 - **LLM provider credentials** — one of: AWS Access Key ID + Secret + Region (Bedrock), Anthropic API key, or OpenRouter API key
 - **Slack tokens** — Bot Token (`xoxb-…`) and App Token (`xapp-…`)
-- **Telegram token** — from @BotFather (if using Telegram)
 - **Brave Search API key**
 - **OpenAI API key** — optional, required for Whisper voice transcription
 - **Admin email and display name** — for the Admin UI login
