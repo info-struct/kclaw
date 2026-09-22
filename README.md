@@ -308,7 +308,7 @@ The provisioning process handles Identity, Tenant (Bot) assignment, Provider set
 - **Email (optional):** Entering the user's email allows K-Claw to automatically attempt to link their Slack identity if they will be using the Slack integration.
 - **Role:** Select `User`, `Team Lead`, or `Admin`.
 - **Expires In:** Choose how long the invite link will remain valid (1, 7, or 30 days).
-- **Platform:** Choose the user's primary interface platform (`Any / Not specified`, `Telegram`, or `Slack`).
+- **Platform:** Choose the user's primary interface platform slack
 
 #### Step 2: Assign a Bot / Tenant
 
