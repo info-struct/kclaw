@@ -83,7 +83,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 **Messaging & Intelligence**
 
-- Slack and Telegram channels
+- Slack channels
 - Wisper flow audio transcription on slack record function ( with api key )
 - **Native Document Support:** Full support for `application/pdf` parsing routed dynamically to Claude 3.5/4.x document blocks
 - Persistent agent pods — session context kept in memory across messages
