@@ -1,27 +1,25 @@
 # KClaw
 
-![Application Screenshot](Images/Kclawlogo-small.pngKClaw
+![Application Screenshot](Images/Kclawlogo-small.png)
 
-![KClaw](Images/Kclawlogo-small.png)
+**KClaw is a self-hosted AI assistant platform your IT team runs on your own Kubernetes cluster.** Everyone on your team gets their own assistant they talk to in Slack — one that researches across connected tools like Google Workspace and Drive, reads PDFs, runs scheduled tasks, and uses MCP servers and Claude Code skills. It scales to 30 agents on infrastructure you already have, managed entirely by IT.
 
-**KClaw is a self-hosted AI assistant platform your IT team runs on your own
-Kubernetes cluster.** Everyone on your team gets their own assistant they talk
-to in Slack — one that researches across connected tools like Google Workspace
-and Drive, reads PDFs, runs scheduled tasks, and uses MCP servers and Claude
-Code skills. It scales to 30 agents on infrastructure you already have, managed
-entirely by IT.
+Built for organizations that need **governance, data sovereignty, and cost control** — not a personal agent running on someone’s workstation.
 
-Built for organizations that need **governance, data sovereignty, and cost
-control** — not a personal agent running on someone's workstation.
-
-**Why KClaw instead of Claude Managed Agents or Microsoft Copilot:**
+**Why KClaw instead of Claude Managed Agents, Grok bot, Openclaw, Heremes, or  Microsoft Copilot:**
 
 - **Data sovereignty** — runs on your infrastructure (on-prem, AWS, Raspberry Pi). Conversation data never leaves your cluster.
 - **Cost control** — free for up to 30 tenants under FSL-1.1. No per-seat SaaS fees. Pair with AWS Bedrock or OpenRouter to optimize model costs.
 - **IT governance** — full RBAC, SAML SSO, audit trails, token budgets per tenant, and credential vault managed by IT — not by individual users.
 - **Model-agnostic via LiteLLM** — AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, 100+ models). No vendor lock-in.
 
-Running in production on k3s (Graviton, EC2, Raspberry Pi 5).
+**Running in production on k3s (Graviton, EC2, Raspberry Pi 5).**
+
+
+
+![KClaw Admin UI — Sessions view showing per-tenant agent pods](Images/Screenshot.png)
+
+
 
 ---
 
