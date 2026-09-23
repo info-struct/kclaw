@@ -6,7 +6,7 @@
 
 Built for organizations that need **governance, data sovereignty, and cost control** — not a personal agent running on someone’s workstation.
 
-**Why KClaw instead of Claude Managed Agents, Grok bot, Openclaw, Heremes, or  Microsoft Copilot:**
+**Why KClaw instead of Claude Managed Agents, Grok bot, Openclaw, Hermes, or  Microsoft Copilot:**
 
 - **Data sovereignty** — runs on your infrastructure (on-prem, AWS, Raspberry Pi). Conversation data never leaves your cluster.
 - **Cost control** — free for up to 30 tenants under FSL-1.1. No per-seat SaaS fees. Pair with AWS Bedrock or OpenRouter to optimize model costs.
