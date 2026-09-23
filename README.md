@@ -1,25 +1,59 @@
 # KClaw
 
-![Application Screenshot](Images/Kclawlogo-small.png)
+![Application Screenshot](Images/Kclawlogo-small.pngKClaw
 
-**IT-managed, multi-tenant AI assistant platform for small business and enterprise.** KClaw gives your team a Chief of Staff and researcher — integrating Google Workspace, Slack,calendar, drive, and office tools via a personalized AI assistant per user. Scales to 30 agents on existing Kubernetes infrastructure, managed entirely by IT.
+![KClaw](Images/Kclawlogo-small.png)
 
-Built for organizations that need **governance, data sovereignty, and cost control** — not a personal agent running on someone's workstation.
+**KClaw is a self-hosted AI assistant platform your IT team runs on your own
+Kubernetes cluster.** Everyone on your team gets their own assistant they talk
+to in Slack — one that researches across connected tools like Google Workspace
+and Drive, reads PDFs, runs scheduled tasks, and uses MCP servers and Claude
+Code skills. It scales to 30 agents on infrastructure you already have, managed
+entirely by IT.
+
+Built for organizations that need **governance, data sovereignty, and cost
+control** — not a personal agent running on someone's workstation.
 
 **Why KClaw instead of Claude Managed Agents or Microsoft Copilot:**
+
 - **Data sovereignty** — runs on your infrastructure (on-prem, AWS, Raspberry Pi). Conversation data never leaves your cluster.
 - **Cost control** — free for up to 30 tenants under FSL-1.1. No per-seat SaaS fees. Pair with AWS Bedrock or OpenRouter to optimize model costs.
 - **IT governance** — full RBAC, SAML SSO, audit trails, token budgets per tenant, and credential vault managed by IT — not by individual users.
 - **Model-agnostic via LiteLLM** — AWS Bedrock (Anthropic, Titan, Llama), Anthropic API, OpenRouter (Gemini, Mistral, 100+ models). No vendor lock-in.
 
-Running in production on k3s (Graviton, EC2, Raspberry PI 5).
+Running in production on k3s (Graviton, EC2, Raspberry Pi 5).
+
+---
+
+## Quickstart
+
+KClaw installs with a single interactive command. It provisions k3s, Helm,
+LiteLLM, PostgreSQL, and every KClaw component for you.
+
+**What you'll need on hand:**
+
+- A Linux host (Ubuntu) with `sudo`
+- **Slack workspace admin rights** — the installer prompts for a bot token and an app token, so the Slack app must exist before you install
+- **One LLM provider** — AWS Bedrock keys, an Anthropic API key, or an OpenRouter API key
+- A Brave Search API key, and optionally an OpenAI key for voice transcription
+- An admin email and display name for the Admin UI login
+
+**Three steps:**
+
+1. **Set up the Slack app** (~5 minutes) → [Setting up Slack](#setting-up-slack)
+2. **Run the installer** → [Installing backend](#installing-backend)
+3. **Sign in and add your first user** → [UI access and setup](#ui-access-and-setup)
+
+Token scopes, app configuration, and troubleshooting are covered in detail in
+those sections below.
+
 ---
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  Kubernetes Cluster (kclaw namespace)                                │
+│  Kubernetes Cluster (kclaw namespace)                                   │
 │                                                                         │
 │  ┌─────────────────┐   ┌───────────────────────────────────────────┐    │
 │  │  KClaw Admin UI │   │  Orchestrator                             │    │
@@ -50,19 +84,22 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 
 ### Components
 
-| Component | Image | Port | Ingress |
-|-----------|-------|------|---------|
-| CredRouter | `YOUR_REGISTRY/kubeclaw-credrouter:latest` | 3001 (internal) | — |
-| Orchestrator | `YOUR_REGISTRY/kubeclaw-orchestrator:latest` | 8787, 3002 | `kubeclaw-admin.local` |
-| Admin UI | `YOUR_REGISTRY/kclaw-admin-ui:latest` | 3003 | `kclaw-admin-ui.local` |
-| Agent pods | `YOUR_REGISTRY/kubeclaw-agent:latest` | 3000 (internal) | — |
+The installer deploys all four components — you don't build or pull these
+manually.
+
+| Component    | Image                                        | Port            | Ingress                |
+| ------------ | -------------------------------------------- | --------------- | ---------------------- |
+| CredRouter   | `YOUR_REGISTRY/kubeclaw-credrouter:latest`   | 3001 (internal) | —                      |
+| Orchestrator | `YOUR_REGISTRY/kubeclaw-orchestrator:latest` | 8787, 3002      | `kubeclaw-admin.local` |
+| Admin UI     | `YOUR_REGISTRY/kclaw-admin-ui:latest`        | 3003            | `kclaw-admin-ui.local` |
+| Agent pods   | `YOUR_REGISTRY/kubeclaw-agent:latest`        | 3000 (internal) | —                      |
 
 ## Requirements
 
-- Ubuntu 26.x Linux on AWS or RasberryPi Bookworm or latter. 
-- Kubernetes 1.24+ (tested on k3s on ARM and X86 ) 
+- Ubuntu 26.x on AWS, GCP or Raspberry Pi OS (Bookworm) or later
+- Kubernetes 1.24+ (tested on k3s, ARM and x86)
 - Namespace: `kclaw`
-- Orchestrator node selector: `kubernetes.io/hostname` (agents pin to same node for hostPath access)
+- Orchestrator node selector: `kubernetes.io/hostname` — in the Community edition, agents pin to the same node as the orchestrator for `hostPath` access. Multi-node scheduling is an Enterprise feature.
 - Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
 
 ## Features
@@ -84,7 +121,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 **Messaging & Intelligence**
 
 - Slack channels
-- Wisper flow audio transcription on slack record function ( with api key )
+- Whisper flow audio transcription on Slack record function (with API key)
 - **Native Document Support:** Full support for `application/pdf` parsing routed dynamically to Claude 3.5/4.x document blocks
 - Persistent agent pods — session context kept in memory across messages
 - First message: ~35s (pod creation + startup). Subsequent: ~3–5s
@@ -109,7 +146,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 **Data, Storage & Skills**
 
 - Local `gtd.db` (SQLite) per agent pod for durable GTD task tracking
-- Tiered Skill Architecture:  Separates core system workflows and shared global capabilities from fully isolated, per-channel environments, enabling secure, highly customized skill deployment without cross-contamination.
+- Tiered Skill Architecture: separates core system workflows and shared global capabilities from fully isolated, per-channel environments, enabling secure, highly customized skill deployment without cross-contamination
 - Team-shared dynamic PersistentVolumeClaims (`subPath` mounts) for private agent state
 - Native Skill Repositories loaded seamlessly from folder mappings
 
@@ -123,25 +160,24 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 **Scheduled Tasks**
 
 - Agent uses `ScheduleTask` MCP tool to persist tasks to disk
-- UI Task scheduling and Management via team Virtual employee
-  
+- UI task scheduling and management via team Virtual Employee
 
 ---
 
-## Setting up slack 
+## Setting up Slack
 
 #### Go to the [Slack API Portal](https://api.slack.com/apps?new_app=1).
 
 - Click **Create New App** and select **From scratch**.
 - Enter your app name (we suggest **G-eves** but you can use any name) and select your target Slack workspace.
-- Click **Create App**. 
+- Click **Create App**.
 
-- Get the app Token starts with xapp-???????????? and keep it for latter. 
+- Get the app Token starts with xapp-???????????? and keep it for latter.
 
 - Scroll back up and click **Install to Workspace**, then authorize the app.
 - Goto Oauth & Permission on the right side under Features
 - Copy your **Bot User OAuth Token** (`xoxb-...`) and keep it secret.
-- Now on the right click the App Manifest to configure your apps behavior. 
+- Now on the right click the App Manifest to configure your apps behavior.
 
 - Apply the following app manifest to your Slack application. Update the name fields if you chose a different name.
 
@@ -212,7 +248,7 @@ Running in production on k3s (Graviton, EC2, Raspberry PI 5).
 }
 ```
 
-- Go back to Oauth & Permissions and Reinstall your OAuth Token to your org by pressing Reinstall to button. 
+- Go back to Oauth & Permissions and reinstall your OAuth token to your workspace by pressing the **Reinstall to Workspace** button.
 
 ## Installing backend
 
@@ -235,16 +271,14 @@ cd kclaw
 tar -xvf kclaw-installer.tar.gz
 cd kubeclaw-installer
 
+# Verify the tarball before running it — this executes as root
+md5sum -c ../md5sum-kclaw-installer.gz.txt
+
 # Run the interactive installer as root
 sudo ./scripts/install.sh
 ```
 
 The installer will prompt for your credentials and automatically provision k3s, Helm, LiteLLM, PostgreSQL, and all KClaw components.
-
-**Verify the installer tarball before running it:**
-```bash
-md5sum -c ../md5sum-kclaw-installer.gz.txt
-```
 
 ## UI access and setup
 
@@ -259,12 +293,11 @@ LITELLM_MASTER_KEY=<generated>
 ```
 
 For external access, expose the Admin UI (port 3003) using one of:
+
 - **Cloudflare Tunnel** (recommended): https://developers.cloudflare.com/tunnel/setup/
 - **Traefik ingress with TLS**: https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/#tls
 
 Change your admin password on first login.
-
-
 
 ## K-Claw Team Setup Guide
 
@@ -272,7 +305,7 @@ This guide covers how to set up Teams in the K-Claw Admin UI. Teams allow you to
 
 #### Creating a Team
 
-1. #### Navigate to the **Teams** section in the K-Claw Admin UI (`/admin/teams`).
+1. Navigate to the **Teams** section in the K-Claw Admin UI (`/admin/teams`).
 
 2. Click the **+ Create Team** button in the top right.
 
@@ -290,15 +323,13 @@ This guide covers how to set up Teams in the K-Claw Admin UI. Teams allow you to
 
 - Once created, you can click **Manage →** next to the team in the list to configure shared MCP servers and Config Keys for the team.
 
-  
-
 ## K-Claw User Provisioning Guide
 
 This guide explains how to invite and provision new users (and their associated agent tenants) using the K-Claw Admin UI Wizard.
 
 #### The Add User Wizard
 
-To onboard a new user, navigate to the **Settings** or **Users** area of the Admin UI and click to open the **Add User Wizard**. 
+To onboard a new user, navigate to the **Settings** or **Users** area of the Admin UI and click to open the **Add User Wizard**.
 
 The provisioning process handles Identity, Tenant (Bot) assignment, Provider setup, and Invite link generation in one streamlined flow.
 
@@ -308,7 +339,7 @@ The provisioning process handles Identity, Tenant (Bot) assignment, Provider set
 - **Email (optional):** Entering the user's email allows K-Claw to automatically attempt to link their Slack identity if they will be using the Slack integration.
 - **Role:** Select `User`, `Team Lead`, or `Admin`.
 - **Expires In:** Choose how long the invite link will remain valid (1, 7, or 30 days).
-- **Platform:** Choose the user's primary interface platform slack
+- **Platform:** Choose the user's primary interface platform — Slack.
 
 #### Step 2: Assign a Bot / Tenant
 
@@ -322,13 +353,13 @@ You must decide how this user will interact with the system:
 
 - **Bot / tenant name:** A friendly name for the agent (e.g., `Alice's Bot`).
 - **Identifier:** A URL-safe slug generated from the name (e.g., `alices-bot`). Used for internal routing and storage paths.
-- **Team (optional):** Assign the new tenant to a pre-existing Team (see `team-setup.md`). This grants the agent access to the team's shared PVC storage and MCP servers.
+- **Team (optional):** Assign the new tenant to a pre-existing Team (see [Team Setup Guide](docs/team-setup.md)). This grants the agent access to the team's shared PVC storage and MCP servers.
 
 #### Step 4: Model Provider (New Tenant Only)
 
 Configure the LLM provider for the new tenant. K-Claw provides presets to speed this up:
 
-- **Provider:** Choose between `LiteLLM (cluster proxy)` or `Anthropic (direct)`. 
+- **Provider:** Choose between `LiteLLM (cluster proxy)` or `Anthropic (direct)`.
   - *Note: LiteLLM is the recommended default for cluster environments.*
 - **Model ID:** Defaults to `claude-sonnet-4-6`.
 - **Base URL:** If using LiteLLM, this defaults to the cluster-internal service URL (e.g., `http://litellm-service.default.svc.cluster.local:4000`).
@@ -337,16 +368,28 @@ Configure the LLM provider for the new tenant. K-Claw provides presets to speed 
 #### Step 5: Review & Send
 
 1. Review the summary of the invite, tenant assignment, and provider config.
-2. Click **Create & Send Invite**. 
+2. Click **Create & Send Invite**.
 3. The system will provision the tenant in the Kubernetes cluster, configure the provider, and generate a unique invite link.
 4. Copy the generated invite link and send it to the user. Once they click it, their messaging platform will be linked to the newly provisioned tenant.
+
+## Documentation
+
+- [Model configuration guide](docs/model-config-guide.md)
+- [Model support matrix](docs/model-support-matrix.md)
+- [Team setup guide](docs/team-setup.md)
+- [Virtual employee scheduling](docs/virtual-employee-scheduling.md)
+- [User guide](User%20Guide.md)
+- [Slack troubleshooting](SLACK_TROUBLESHOOTING.md)
+- [Security policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## License
 
 **KClaw FSL-1.1-ALv2**
 
-- Free for personal and small business use (up to 30 agents/tenents)
+- Free for personal and small business use (up to 30 agents/tenants)
 - No selling, leasing, or sub-licensing as a standalone product
 - Enterprise license required for >30 tenants or commercial SaaS use
 
 See [LICENSE](https://github.com/info-struct/kclaw/blob/main/LICENSE.md) for full terms.
+
