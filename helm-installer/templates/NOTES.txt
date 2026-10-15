@@ -1,0 +1,19 @@
+KClaw has been installed.
+
+Bootstrap Job status:
+  kubectl logs -n {{ .Release.Namespace }} -l app=kclaw-bootstrap --tail=20
+
+Admin UI:
+{{- if .Values.ingress.adminUI.enabled }}
+  http{{ if .Values.ingress.adminUI.tls }}s{{ end }}://{{ .Values.ingress.adminUI.host }}
+{{- else }}
+  kubectl port-forward -n {{ .Release.Namespace }} svc/kclaw-admin-ui 3003:3003
+  open http://localhost:3003
+{{- end }}
+
+LiteLLM UI (internal only):
+  kubectl port-forward -n {{ .Release.Namespace }} svc/litellm 4000:4000
+  open http://localhost:4000/ui
+
+To retrieve generated secrets:
+  kubectl get secret -n {{ .Release.Namespace }} kclaw-generated-secrets -o yaml

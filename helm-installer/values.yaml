@@ -1,0 +1,94 @@
+# ── Required ──────────────────────────────────────────────────────────────────
+# kubernetes.io/hostname of the node KClaw components will pin to.
+# Label it first: kubectl label node <name> kclaw-node=true
+node: ""
+
+admin:
+  email: ""
+  name: ""
+
+# ── Messaging channels ────────────────────────────────────────────────────────
+# At least one channel must be enabled.
+
+slack:
+  enabled: false
+  botToken: ""    # xoxb-...
+  appToken: ""    # xapp-... (Socket Mode app-level token)
+
+telegram:
+  enabled: false
+  botToken: ""    # from @BotFather
+
+# ── LLM provider ──────────────────────────────────────────────────────────────
+llm:
+  provider: anthropic    # anthropic | bedrock | openrouter
+  assistantName: "G-eves"
+
+  anthropic:
+    apiKey: ""
+
+  bedrock:
+    accessKeyId: ""
+    secretAccessKey: ""
+    region: us-east-1
+    anthropicFallbackKey: ""    # optional direct-Anthropic fallback
+
+  openrouter:
+    apiKey: ""
+    model: "google/gemini-flash-1.5"
+
+# ── Optional integrations ─────────────────────────────────────────────────────
+openai:
+  apiKey: ""        # Whisper voice transcription
+
+braveSearch:
+  apiKey: ""        # Web search in agent conversations
+
+# ── Storage ───────────────────────────────────────────────────────────────────
+storageClass: local-path
+workspacePath: /opt/kubeclaw/workspace
+
+# ── Ingress ───────────────────────────────────────────────────────────────────
+ingress:
+  className: nginx    # traefik | nginx | or your controller's class name
+  adminUI:
+    enabled: true
+    host: kclaw-admin-ui.local
+    annotations: {}
+    tls: []
+  adminApi:
+    enabled: true
+    host: kclaw-admin.local
+    annotations: {}
+    tls: []
+  cookieSecure: "false"    # set "true" when serving over HTTPS
+
+# ── Secrets (leave blank to auto-generate) ────────────────────────────────────
+secrets:
+  encryptionKey: ""
+  jwtSecret: ""
+  adminToken: ""
+  litellmMasterKey: ""
+  postgresPassword: ""
+
+# ── Images ────────────────────────────────────────────────────────────────────
+images:
+  credrouter:   infostructkclaw/kubeclaw-credrouter:latest
+  orchestrator: infostructkclaw/kubeclaw-orchestrator:latest
+  agent:        infostructkclaw/kubeclaw-agent:latest
+  adminUI:      infostructkclaw/kclaw-admin-ui:latest
+  pullSecret:   ""    # name of an existing imagePullSecret in the release namespace
+
+# ── PostgreSQL subchart ───────────────────────────────────────────────────────
+postgresql:
+  enabled: true
+  externalHost: ""        # required if postgresql.enabled is false
+  externalPassword: ""    # required if postgresql.enabled is false
+  auth:
+    database: litellm
+    # password: auto-generated — do not set here; managed via kclaw-generated-secrets
+  primary:
+    nodeSelector: {}    # defaults to node value above if blank
+    persistence:
+      storageClass: ""  # defaults to .Values.storageClass if blank
+      size: 5Gi

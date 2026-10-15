@@ -1,0 +1,49 @@
+{{- $provider := .Values.llm.provider -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    model_list:
+    {{- if eq $provider "anthropic" }}
+      - model_name: primary
+        litellm_params:
+          model: anthropic/claude-sonnet-4-6
+          api_key: os.environ/ANTHROPIC_API_KEY
+      - model_name: claude-haiku-4-5-20251001
+        litellm_params:
+          model: anthropic/claude-haiku-4-5-20251001
+          api_key: os.environ/ANTHROPIC_API_KEY
+    {{- else if eq $provider "bedrock" }}
+      - model_name: primary
+        litellm_params:
+          model: bedrock/us.anthropic.claude-sonnet-4-6
+          aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+          aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+          aws_region_name: os.environ/AWS_REGION_NAME
+      - model_name: claude-haiku-4-5-20251001
+        litellm_params:
+          model: bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0
+          aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+          aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+          aws_region_name: os.environ/AWS_REGION_NAME
+    {{- else if eq $provider "openrouter" }}
+      - model_name: primary
+        litellm_params:
+          model: openrouter/{{ .Values.llm.openrouter.model }}
+          api_key: os.environ/OPENROUTER_API_KEY
+    {{- end }}
+    router_settings:
+      routing_strategy: least-busy
+      num_retries: 3
+      allowed_fails: 3
+      cooldown_time: 10
+    general_settings:
+      master_key: os.environ/LITELLM_MASTER_KEY
+      database_url: os.environ/DATABASE_URL
+      store_model_in_db: true
+      default_model: primary

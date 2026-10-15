@@ -1,0 +1,155 @@
+{{- $s := fromYaml (include "kclaw.secrets" .) -}}
+---
+# post-install Job — runs once after all resources are created.
+# Responsibilities:
+#   1. Wait for LiteLLM readiness
+#   2. Generate a LiteLLM virtual key and store it as a Secret
+#   3. Bootstrap the CredRouter tenant database (requires CredRouter bootstrap CLI — see TODO below)
+#   4. Create the first Admin UI user (requires Admin UI CLI — see TODO below)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kclaw-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kclaw-bootstrap
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: kclaw-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      {{- include "kclaw.nodeSelector" . | nindent 6 }}
+      {{- include "kclaw.tolerations" . | nindent 6 }}
+      serviceAccountName: kclaw-bootstrap
+      initContainers:
+        # Wait for LiteLLM to pass its readiness probe before attempting key generation.
+        - name: wait-litellm
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for LiteLLM..."
+              until curl -sf http://litellm.{{ .Release.Namespace }}.svc.cluster.local:4000/health/readiness; do
+                sleep 5
+              done
+              echo "LiteLLM ready"
+        # Wait for CredRouter to pass its readiness probe.
+        - name: wait-credrouter
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for CredRouter..."
+              until curl -sf http://credrouter.{{ .Release.Namespace }}.svc.cluster.local/health; do
+                sleep 5
+              done
+              echo "CredRouter ready"
+      containers:
+        - name: bootstrap
+          image: curlimages/curl:latest
+          env:
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: LITELLM_MASTER_KEY
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-secrets
+                  key: ADMIN_TOKEN
+            - name: CREDROUTER_URL
+              value: "http://credrouter.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: LITELLM_URL
+              value: "http://litellm.{{ .Release.Namespace }}.svc.cluster.local:4000"
+            - name: ADMIN_EMAIL
+              value: {{ required "admin.email is required" .Values.admin.email | quote }}
+            - name: ADMIN_NAME
+              value: {{ required "admin.name is required" .Values.admin.name | quote }}
+            {{- if .Values.slack.enabled }}
+            - name: TENANT_SLACK
+              value: "true"
+            {{- end }}
+            {{- if .Values.telegram.enabled }}
+            - name: TENANT_TELEGRAM
+              value: "true"
+            {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+
+              # ── Step 1: Generate LiteLLM virtual key ──────────────────────────
+              echo "Generating LiteLLM virtual key..."
+              LITELLM_VIRTUAL_KEY=$(curl -sf -X POST "${LITELLM_URL}/key/generate" \
+                -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \
+                -H "Content-Type: application/json" \
+                -d '{"key_alias":"main"}' | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+
+              if [ -z "$LITELLM_VIRTUAL_KEY" ]; then
+                echo "ERROR: Failed to generate LiteLLM virtual key"
+                exit 1
+              fi
+              echo "LiteLLM virtual key generated"
+
+              # Store key via CredRouter admin API for use by tenants.
+              # TODO: confirm the CredRouter admin endpoint for storing the litellm key.
+              # Expected: POST /admin/settings  body: {"key":"litellm_key_main","value":"$LITELLM_VIRTUAL_KEY"}
+              curl -sf -X POST "${CREDROUTER_URL}/admin/settings" \
+                -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "{\"key\":\"litellm_key_main\",\"value\":\"${LITELLM_VIRTUAL_KEY}\"}" || \
+                echo "WARN: Could not store litellm key in CredRouter — run bootstrap manually"
+
+              # ── Step 2: Bootstrap CredRouter tenants ─────────────────────────
+              # TODO: CredRouter needs a bootstrap HTTP endpoint or one-shot CLI mode.
+              # Once available, the equivalent of Phase 11 in install.sh goes here.
+              #
+              # Until then, bootstrap manually:
+              #   CREDROUTER_POD=$(kubectl get pods -n kclaw -l app=credrouter -o jsonpath='{.items[0].metadata.name}')
+              #   kubectl cp /path/to/bootstrap.mjs kclaw/${CREDROUTER_POD}:/tmp/bootstrap.mjs
+              #   kubectl exec -n kclaw ${CREDROUTER_POD} -- node /tmp/bootstrap.mjs
+              #
+              # See install.sh Phase 11 for the full bootstrap script.
+
+              if [ "${TENANT_SLACK}" = "true" ]; then
+                echo "TODO: bootstrap slack-main tenant via CredRouter API"
+              fi
+              if [ "${TENANT_TELEGRAM}" = "true" ]; then
+                echo "TODO: bootstrap telegram-main tenant via CredRouter API"
+              fi
+
+              # ── Step 3: Create admin user ─────────────────────────────────────
+              # TODO: Admin UI needs an HTTP bootstrap endpoint or the CLI available in this container.
+              # Until then, create the admin user manually:
+              #   kubectl port-forward -n kclaw svc/credrouter 8080:80
+              #   CREDROUTER_URL=http://127.0.0.1:8080 CREDROUTER_ADMIN_TOKEN=<token> \
+              #     npx tsx src/admin/cli.ts iam bootstrap "$ADMIN_EMAIL" --name "$ADMIN_NAME"
+              echo "TODO: create admin user ${ADMIN_EMAIL}"
+
+              echo "Bootstrap complete. Check logs above for any TODOs."
+---
+# ServiceAccount for the bootstrap Job — needs no cluster permissions beyond
+# reading Secrets in the release namespace (handled by the pod env injection above).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kclaw-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation
