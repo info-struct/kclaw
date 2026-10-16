@@ -3,15 +3,10 @@ entries:
   kclaw:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T00:34:16.293965295Z"
-    dependencies:
-    - condition: postgresql.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: 16.x.x
+    created: "2026-10-16T05:05:21.092040594Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
-    digest: 0ee0cec2dbe79a6455041c02ca9aba4e442cb0a2a5538d825e3c3c8815b8ce44
+    digest: 230b0cb2a52406f0bc30e29174be9cd5a9fe9056d185c71c2e1bdf9c01715d21
     home: https://github.com/info-struct/kclaw
     keywords:
     - claude
@@ -27,7 +22,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T00:34:16.288381695Z"
+    created: "2026-10-16T05:05:21.088567456Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -49,47 +44,4 @@ entries:
     urls:
     - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.0.tgz
     version: 0.1.0
-  postgresql:
-  - annotations:
-      category: Database
-      images: |
-        - name: os-shell
-          image: docker.io/bitnami/os-shell:12-debian-12-r51
-        - name: postgres-exporter
-          image: docker.io/bitnami/postgres-exporter:0.17.1-debian-12-r16
-        - name: postgresql
-          image: docker.io/bitnami/postgresql:17.6.0-debian-12-r4
-      licenses: Apache-2.0
-      tanzuCategory: service
-    apiVersion: v2
-    appVersion: 17.6.0
-    created: "2026-10-16T00:34:16.298355111Z"
-    dependencies:
-    - name: common
-      repository: oci://registry-1.docker.io/bitnamicharts
-      tags:
-      - bitnami-common
-      version: 2.x.x
-    description: PostgreSQL (Postgres) is an open source object-relational database
-      known for reliability and data integrity. ACID-compliant, it supports foreign
-      keys, joins, views, triggers and stored procedures.
-    digest: d7d0f7d0342d56504f3bb2f77867e0b7173f6322f11266b74e2d0eda53365901
-    home: https://bitnami.com
-    icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/postgresql/img/postgresql-stack-220x234.png
-    keywords:
-    - postgresql
-    - postgres
-    - database
-    - sql
-    - replication
-    - cluster
-    maintainers:
-    - name: Broadcom, Inc. All Rights Reserved.
-      url: https://github.com/bitnami/charts
-    name: postgresql
-    sources:
-    - https://github.com/bitnami/charts/tree/main/bitnami/postgresql
-    urls:
-    - https://info-struct.github.io/kclaw/helm-installer/charts/postgresql-16.7.27.tgz
-    version: 16.7.27
-generated: "2026-10-16T00:34:16.282962881Z"
+generated: "2026-10-16T05:05:21.081713803Z"
