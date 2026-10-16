@@ -3,7 +3,31 @@ entries:
   kclaw:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T00:26:19.28759816Z"
+    created: "2026-10-16T00:34:16.293965295Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.x.x
+    description: KClaw — self-hosted AI assistant platform for existing Kubernetes
+      clusters
+    digest: 0ee0cec2dbe79a6455041c02ca9aba4e442cb0a2a5538d825e3c3c8815b8ce44
+    home: https://github.com/info-struct/kclaw
+    keywords:
+    - claude
+    - ai
+    - assistant
+    - kubernetes
+    maintainers:
+    - name: info-struct
+    name: kclaw
+    type: application
+    urls:
+    - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-10-16T00:34:16.288381695Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -39,7 +63,7 @@ entries:
       tanzuCategory: service
     apiVersion: v2
     appVersion: 17.6.0
-    created: "2026-10-16T00:26:19.292550225Z"
+    created: "2026-10-16T00:34:16.298355111Z"
     dependencies:
     - name: common
       repository: oci://registry-1.docker.io/bitnamicharts
@@ -68,4 +92,4 @@ entries:
     urls:
     - https://info-struct.github.io/kclaw/helm-installer/charts/postgresql-16.7.27.tgz
     version: 16.7.27
-generated: "2026-10-16T00:26:19.280722004Z"
+generated: "2026-10-16T00:34:16.282962881Z"
