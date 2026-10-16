@@ -1,0 +1,6 @@
+# Helm repo publish artifacts — not part of the chart source
+*.tgz
+index.yaml
+
+# Local test values contain real credentials
+test-values.yaml
