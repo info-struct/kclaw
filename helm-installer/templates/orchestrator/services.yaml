@@ -1,0 +1,42 @@
+---
+# CredProxy service — used by agent pods to reach the credential proxy.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kclaw-orchestrator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kubeclaw
+    component: orchestrator
+spec:
+  type: ClusterIP
+  selector:
+    app: kubeclaw
+    component: orchestrator
+  ports:
+    - name: proxy
+      port: 8787
+      targetPort: proxy
+      protocol: TCP
+---
+# Admin API service — used by the Admin UI and the ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeclaw-admin-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kubeclaw
+    component: orchestrator
+spec:
+  type: ClusterIP
+  selector:
+    app: kubeclaw
+    component: orchestrator
+  ports:
+    - name: admin-api
+      port: 3002
+      targetPort: admin-api
+      protocol: TCP

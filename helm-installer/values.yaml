@@ -80,6 +80,12 @@ images:
   pullSecret:   ""    # name of an existing imagePullSecret in the release namespace
 
 # ── PostgreSQL subchart ───────────────────────────────────────────────────────
+# ── Task Executor ─────────────────────────────────────────────────────────────
+taskExecutor:
+  enabled: true
+  schedule: "* * * * *"
+
+# ── PostgreSQL subchart ───────────────────────────────────────────────────────
 postgresql:
   enabled: true
   externalHost: ""        # required if postgresql.enabled is false

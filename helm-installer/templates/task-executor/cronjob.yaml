@@ -1,0 +1,72 @@
+{{- if .Values.taskExecutor.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kubeclaw-task-executor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kubeclaw
+    component: task-executor
+spec:
+  schedule: {{ .Values.taskExecutor.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "kclaw.labels" . | nindent 12 }}
+            app: kubeclaw
+            component: task-executor
+        spec:
+          serviceAccountName: kubeclaw-orchestrator
+          {{- include "kclaw.imagePullSecrets" . | nindent 10 }}
+          {{- include "kclaw.nodeSelector" . | nindent 10 }}
+          {{- include "kclaw.tolerations" . | nindent 10 }}
+          restartPolicy: Never
+          containers:
+            - name: task-executor
+              image: {{ .Values.images.orchestrator | quote }}
+              imagePullPolicy: Always
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  cd /app
+                  node dist/task-executor.js
+              env:
+                - name: K8S_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: K8S_NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                - name: USE_PERSISTENT_AGENTS
+                  value: "1"
+                - name: PROJECT_ROOT
+                  value: /workspace
+                - name: CONTAINER_IMAGE
+                  value: {{ .Values.images.agent | quote }}
+              volumeMounts:
+                - name: workspace-data
+                  mountPath: /workspace
+                - name: env-file
+                  mountPath: /app/.env
+                  subPath: .env
+                  readOnly: true
+          volumes:
+            - name: workspace-data
+              hostPath:
+                path: {{ .Values.workspacePath }}
+                type: DirectoryOrCreate
+            - name: env-file
+              secret:
+                secretName: kclaw-env
+{{- end }}

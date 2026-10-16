@@ -1,0 +1,115 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credrouter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: credrouter
+    component: credential-router
+spec:
+  replicas: 1
+  # Recreate avoids two pods competing over the SQLite file on the PVC.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: credrouter
+      component: credential-router
+  template:
+    metadata:
+      labels:
+        {{- include "kclaw.labels" . | nindent 8 }}
+        app: credrouter
+        component: credential-router
+    spec:
+      serviceAccountName: credrouter
+      automountServiceAccountToken: true
+      {{- include "kclaw.imagePullSecrets" . | nindent 6 }}
+      {{- include "kclaw.nodeSelector" . | nindent 6 }}
+      {{- include "kclaw.tolerations" . | nindent 6 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: credrouter
+          image: {{ .Values.images.credrouter | quote }}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3001"
+            - name: DATABASE_PATH
+              value: /data/credrouter.db
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: info
+            - name: K8S_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-generated-secrets
+                  key: encryption-key
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-generated-secrets
+                  key: jwt-secret
+            - name: CREDROUTER_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-secrets
+                  key: ADMIN_TOKEN
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: credrouter-data

@@ -1,0 +1,31 @@
+{{- if .Values.ingress.adminApi.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kubeclaw-admin-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  {{- with .Values.ingress.adminApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.adminApi.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kubeclaw-admin-api
+                port:
+                  number: 3002
+  {{- with .Values.ingress.adminApi.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

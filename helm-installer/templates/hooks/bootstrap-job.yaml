@@ -1,4 +1,3 @@
-{{- $s := fromYaml (include "kclaw.secrets" .) -}}
 ---
 # post-install Job — runs once after all resources are created.
 # Responsibilities:

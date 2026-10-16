@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: credrouter-data
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: credrouter
+    component: credential-router
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: {{ .Values.storageClass }}

@@ -1,0 +1,94 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeclaw-orchestrator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kubeclaw
+    component: orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeclaw
+      component: orchestrator
+  template:
+    metadata:
+      labels:
+        {{- include "kclaw.labels" . | nindent 8 }}
+        app: kubeclaw
+        component: orchestrator
+    spec:
+      serviceAccountName: kubeclaw-orchestrator
+      automountServiceAccountToken: true
+      {{- include "kclaw.imagePullSecrets" . | nindent 6 }}
+      {{- include "kclaw.nodeSelector" . | nindent 6 }}
+      {{- include "kclaw.tolerations" . | nindent 6 }}
+      containers:
+        - name: kubeclaw-orchestrator
+          image: {{ .Values.images.orchestrator | quote }}
+          imagePullPolicy: Always
+          ports:
+            - name: proxy
+              containerPort: 8787
+              protocol: TCP
+            - name: admin-api
+              containerPort: 3002
+              protocol: TCP
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CREDENTIAL_PROXY_PORT
+              value: "8787"
+            - name: USE_PERSISTENT_AGENTS
+              value: "1"
+            - name: PROJECT_ROOT
+              value: /workspace
+            - name: HOST_WORKSPACE_PATH
+              value: {{ .Values.workspacePath | quote }}
+            - name: CREDROUTER_URL
+              value: {{ include "kclaw.credRouterURL" . | quote }}
+            - name: CONTAINER_IMAGE
+              value: {{ .Values.images.agent | quote }}
+            - name: ASSISTANT_NAME
+              value: {{ .Values.llm.assistantName | quote }}
+            - name: ADMIN_API_PORT
+              value: "3002"
+            - name: ADMIN_API_HOST
+              value: "0.0.0.0"
+            - name: CREDROUTER_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-secrets
+                  key: ADMIN_TOKEN
+          volumeMounts:
+            - name: workspace-data
+              mountPath: /workspace
+            - name: env-file
+              mountPath: /app/.env
+              subPath: .env
+              readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+      volumes:
+        - name: workspace-data
+          hostPath:
+            path: {{ .Values.workspacePath }}
+            type: DirectoryOrCreate
+        - name: env-file
+          secret:
+            secretName: kclaw-env
+            optional: false
