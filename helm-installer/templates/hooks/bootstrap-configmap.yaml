@@ -16,8 +16,8 @@ metadata:
 data:
   bootstrap.mjs: |
     import { initDatabase } from '/app/dist/db/client.js';
-    import { createTenant } from '/app/dist/db/tenants.js';
-    import { createProviderConfig } from '/app/dist/db/provider-configs.js';
+    import { createTenant, getTenantByIdentifier } from '/app/dist/db/tenants.js';
+    import { createProviderConfig, getProviderConfigsByTenant } from '/app/dist/db/provider-configs.js';
     import { setSetting } from '/app/dist/db/system-settings.js';
 
     const LITELLM_KEY      = process.env.LITELLM_KEY;
@@ -36,41 +36,55 @@ data:
     console.log('System settings written');
 
     function bootstrapTenant(tenantId, tenantName) {
-      const tenant = createTenant(tenantName, tenantId, 1000000, 30000000);
-      console.log(`Tenant created: ${tenant.id} (${tenantId})`);
+      let tenant = getTenantByIdentifier(tenantId);
+      if (!tenant) {
+        tenant = createTenant(tenantName, tenantId, 1000000, 30000000);
+        console.log(`Tenant created: ${tenant.id} (${tenantId})`);
+      } else {
+        console.log(`Tenant already exists: ${tenant.id} (${tenantId})`);
+      }
 
-      createProviderConfig({
-        tenantId: tenant.id,
-        provider: 'litellm',
-        modelId: 'primary',
-        authType: 'api_key',
-        apiKey: LITELLM_KEY,
-        baseUrl: LITELLM_BASE_URL,
-        maxInputTokens: 1000000,
-        maxOutputTokens: 8192,
-        costPerInputToken: 0,
-        costPerOutputToken: 0,
-        isDefault: true,
-        priority: 0,
-      });
-      console.log(`LiteLLM provider config created for ${tenantId}`);
-
-      if (FALLBACK_KEY) {
+      const existingConfigs = getProviderConfigsByTenant(tenant.id);
+      const hasLitellm = existingConfigs.some(c => c.provider === 'litellm');
+      if (!hasLitellm) {
         createProviderConfig({
           tenantId: tenant.id,
-          provider: 'anthropic',
-          modelId: 'claude-sonnet-4-6',
+          provider: 'litellm',
+          modelId: 'primary',
           authType: 'api_key',
-          apiKey: FALLBACK_KEY,
-          baseUrl: 'https://api.anthropic.com',
-          maxInputTokens: 200000,
+          apiKey: LITELLM_KEY,
+          baseUrl: LITELLM_BASE_URL,
+          maxInputTokens: 1000000,
           maxOutputTokens: 8192,
-          costPerInputToken: 0.000003,
-          costPerOutputToken: 0.000015,
-          isDefault: false,
-          priority: 1,
+          costPerInputToken: 0,
+          costPerOutputToken: 0,
+          isDefault: true,
+          priority: 0,
         });
-        console.log(`Anthropic fallback provider created for ${tenantId}`);
+        console.log(`LiteLLM provider config created for ${tenantId}`);
+      } else {
+        console.log(`LiteLLM provider config already exists for ${tenantId}`);
+      }
+
+      if (FALLBACK_KEY) {
+        const hasAnthropicFallback = existingConfigs.some(c => c.provider === 'anthropic');
+        if (!hasAnthropicFallback) {
+          createProviderConfig({
+            tenantId: tenant.id,
+            provider: 'anthropic',
+            modelId: 'claude-sonnet-4-6',
+            authType: 'api_key',
+            apiKey: FALLBACK_KEY,
+            baseUrl: 'https://api.anthropic.com',
+            maxInputTokens: 200000,
+            maxOutputTokens: 8192,
+            costPerInputToken: 0.000003,
+            costPerOutputToken: 0.000015,
+            isDefault: false,
+            priority: 1,
+          });
+          console.log(`Anthropic fallback provider created for ${tenantId}`);
+        }
       }
     }
 

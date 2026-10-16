@@ -23,3 +23,6 @@ Thumbs.db
 
 # Helm dependency cache — bundled into .tgz at publish time; not committed
 helm-installer/charts/
+
+# Local test values contain real credentials — never commit
+helm-installer/test-values.yaml

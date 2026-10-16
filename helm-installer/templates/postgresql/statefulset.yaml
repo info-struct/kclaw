@@ -1,0 +1,58 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+    app: kclaw-postgresql
+spec:
+  serviceName: {{ .Release.Name }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kclaw-postgresql
+  template:
+    metadata:
+      labels:
+        app: kclaw-postgresql
+    spec:
+      {{- include "kclaw.nodeSelector" . | nindent 6 }}
+      {{- include "kclaw.tolerations" . | nindent 6 }}
+      containers:
+        - name: postgresql
+          image: {{ .Values.postgresql.image | default "postgres:16-alpine" }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | default "litellm" | quote }}
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kclaw-generated-secrets
+                  key: pg-password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: {{ .Values.storageClass | default "local-path" | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.postgresql.primary.persistence.size | default "5Gi" | quote }}
+{{- end }}

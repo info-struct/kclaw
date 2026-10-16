@@ -79,22 +79,19 @@ images:
   adminUI:      infostructkclaw/kclaw-admin-ui:latest
   pullSecret:   ""    # name of an existing imagePullSecret in the release namespace
 
-# ── PostgreSQL subchart ───────────────────────────────────────────────────────
 # ── Task Executor ─────────────────────────────────────────────────────────────
 taskExecutor:
   enabled: true
   schedule: "* * * * *"
 
-# ── PostgreSQL subchart ───────────────────────────────────────────────────────
+# ── PostgreSQL ────────────────────────────────────────────────────────────────
 postgresql:
   enabled: true
-  externalHost: ""        # required if postgresql.enabled is false
-  externalPassword: ""    # required if postgresql.enabled is false
+  image: "postgres:16-alpine"   # official multi-arch image (ARM64 + amd64)
+  externalHost: ""              # required if postgresql.enabled is false
   auth:
     database: litellm
     # password: auto-generated — do not set here; managed via kclaw-generated-secrets
   primary:
-    nodeSelector: {}    # defaults to node value above if blank
     persistence:
-      storageClass: ""  # defaults to .Values.storageClass if blank
       size: 5Gi

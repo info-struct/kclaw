@@ -12,8 +12,4 @@ keywords:
 home: https://github.com/info-struct/kclaw
 maintainers:
   - name: info-struct
-dependencies:
-  - name: postgresql
-    version: "16.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
+dependencies: []

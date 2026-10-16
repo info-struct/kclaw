@@ -30,6 +30,9 @@ rules:
   - apiGroups: [""]
     resources: ["pods/exec"]
     verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -70,7 +73,7 @@ metadata:
     helm.sh/hook-weight: "10"
     helm.sh/hook-delete-policy: before-hook-creation
 spec:
-  backoffLimit: 3
+  backoffLimit: 5
   template:
     metadata:
       labels:
@@ -150,17 +153,29 @@ spec:
 
               # ── Step 1: Generate LiteLLM virtual key ──────────────────────────
               echo "==> Generating LiteLLM virtual key..."
-              LITELLM_KEY=$(curl -sf -X POST "${LITELLM_URL}/key/generate" \
-                -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \
-                -H "Content-Type: application/json" \
-                -d '{"key_alias":"main"}' \
-                | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+              # Check if a previous bootstrap attempt already stored the key
+              LITELLM_KEY=$(kubectl get secret kclaw-litellm-proxy-key -n "${NAMESPACE}" \
+                -o jsonpath='{.data.key}' 2>/dev/null | base64 -d 2>/dev/null || true)
 
               if [ -z "$LITELLM_KEY" ]; then
-                echo "ERROR: Failed to generate LiteLLM virtual key"
-                exit 1
+                KEY_RESP=$(curl -s -X POST "${LITELLM_URL}/key/generate" \
+                  -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \
+                  -H "Content-Type: application/json" \
+                  -d '{"key_alias":"kclaw-proxy"}')
+                LITELLM_KEY=$(echo "$KEY_RESP" | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+
+                if [ -z "$LITELLM_KEY" ]; then
+                  echo "ERROR: Failed to generate LiteLLM virtual key"
+                  echo "Response: $KEY_RESP"
+                  exit 1
+                fi
+
+                # Persist so retries can recover the key
+                kubectl create secret generic kclaw-litellm-proxy-key \
+                  -n "${NAMESPACE}" \
+                  --from-literal=key="${LITELLM_KEY}"
               fi
-              echo "LiteLLM virtual key generated"
+              echo "LiteLLM virtual key ready"
 
               # ── Step 2: Bootstrap CredRouter tenants via kubectl exec ─────────
               echo "==> Finding CredRouter pod..."
@@ -175,7 +190,9 @@ spec:
               echo "CredRouter pod: ${CREDROUTER_POD}"
 
               echo "==> Copying bootstrap script to CredRouter pod..."
-              kubectl cp /scripts/bootstrap.mjs \
+              # ConfigMap mounts are symlinks; -L dereferences to the real file so kubectl cp sends content
+              cp -L /scripts/bootstrap.mjs /tmp/bootstrap_resolved.mjs
+              kubectl cp /tmp/bootstrap_resolved.mjs \
                 "${NAMESPACE}/${CREDROUTER_POD}:/tmp/bootstrap.mjs"
 
               echo "==> Running tenant bootstrap inside CredRouter..."
