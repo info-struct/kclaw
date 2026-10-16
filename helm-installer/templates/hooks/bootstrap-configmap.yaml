@@ -1,0 +1,80 @@
+---
+# Bootstrap script executed inside the CredRouter pod via kubectl exec.
+# Initializes tenants, provider configs, and system settings directly against
+# the SQLite DB using the same module imports as the k3s installer.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kclaw-bootstrap-script
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: before-hook-creation
+data:
+  bootstrap.mjs: |
+    import { initDatabase } from '/app/dist/db/client.js';
+    import { createTenant } from '/app/dist/db/tenants.js';
+    import { createProviderConfig } from '/app/dist/db/provider-configs.js';
+    import { setSetting } from '/app/dist/db/system-settings.js';
+
+    const LITELLM_KEY      = process.env.LITELLM_KEY;
+    const LITELLM_BASE_URL = process.env.LITELLM_BASE_URL;
+    const SLACK_ENABLED    = process.env.SLACK_ENABLED    === 'true';
+    const TELEGRAM_ENABLED = process.env.TELEGRAM_ENABLED === 'true';
+    const FALLBACK_KEY     = process.env.ANTHROPIC_FALLBACK_KEY || '';
+
+    if (!LITELLM_KEY)      { console.error('LITELLM_KEY is required'); process.exit(1); }
+    if (!LITELLM_BASE_URL) { console.error('LITELLM_BASE_URL is required'); process.exit(1); }
+
+    initDatabase();
+
+    setSetting('litellm_key_main', LITELLM_KEY);
+    setSetting('litellm_base_url', LITELLM_BASE_URL);
+    console.log('System settings written');
+
+    function bootstrapTenant(tenantId, tenantName) {
+      const tenant = createTenant(tenantName, tenantId, 1000000, 30000000);
+      console.log(`Tenant created: ${tenant.id} (${tenantId})`);
+
+      createProviderConfig({
+        tenantId: tenant.id,
+        provider: 'litellm',
+        modelId: 'primary',
+        authType: 'api_key',
+        apiKey: LITELLM_KEY,
+        baseUrl: LITELLM_BASE_URL,
+        maxInputTokens: 1000000,
+        maxOutputTokens: 8192,
+        costPerInputToken: 0,
+        costPerOutputToken: 0,
+        isDefault: true,
+        priority: 0,
+      });
+      console.log(`LiteLLM provider config created for ${tenantId}`);
+
+      if (FALLBACK_KEY) {
+        createProviderConfig({
+          tenantId: tenant.id,
+          provider: 'anthropic',
+          modelId: 'claude-sonnet-4-6',
+          authType: 'api_key',
+          apiKey: FALLBACK_KEY,
+          baseUrl: 'https://api.anthropic.com',
+          maxInputTokens: 200000,
+          maxOutputTokens: 8192,
+          costPerInputToken: 0.000003,
+          costPerOutputToken: 0.000015,
+          isDefault: false,
+          priority: 1,
+        });
+        console.log(`Anthropic fallback provider created for ${tenantId}`);
+      }
+    }
+
+    if (SLACK_ENABLED)    bootstrapTenant('slack-main',    'Slack Main');
+    if (TELEGRAM_ENABLED) bootstrapTenant('telegram-main', 'Telegram Main');
+
+    console.log('Done');

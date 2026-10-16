@@ -400,8 +400,7 @@ Update `ingress.className` in your values file to match.
 | LiteLLM templates | Done |
 | CredRouter / Orchestrator / Admin UI templates | Done |
 | Bootstrap Job (LiteLLM key generation) | Done |
-| Bootstrap Job (CredRouter tenant init) | Requires CredRouter bootstrap CLI interface |
-| Admin user creation hook | Requires Admin UI CLI in hook container |
+| Bootstrap Job (CredRouter tenant init) | Done — `kubectl exec` into CredRouter pod |
+| Bootstrap Job (admin user creation) | Done — `POST /admin/iam/bootstrap` on CredRouter |
+| Bootstrap Job (Brave Search tool config) | Done — `POST /admin/tools/:tenantId` |
 | Published Helm repo | Pending |
-
-The bootstrap Jobs depend on a one-shot CLI mode in the CredRouter and Admin UI images. Until that interface is defined, the equivalent bootstrap steps are documented above under [bootstrap flow](#how-bootstrap-works) and can be run manually post-install.

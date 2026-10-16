@@ -1,10 +1,62 @@
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kclaw-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation
+---
+# Needs pods/exec to run the tenant bootstrap script inside the CredRouter pod.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kclaw-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kclaw-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kclaw.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation
+subjects:
+  - kind: ServiceAccount
+    name: kclaw-bootstrap
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: kclaw-bootstrap
+  apiGroup: rbac.authorization.k8s.io
+---
 # post-install Job — runs once after all resources are created.
-# Responsibilities:
-#   1. Wait for LiteLLM readiness
-#   2. Generate a LiteLLM virtual key and store it as a Secret
-#   3. Bootstrap the CredRouter tenant database (requires CredRouter bootstrap CLI — see TODO below)
-#   4. Create the first Admin UI user (requires Admin UI CLI — see TODO below)
+# Sequence:
+#   1. Wait for LiteLLM readiness, generate a virtual API key
+#   2. kubectl exec into CredRouter: init tenant DB (tenants + provider configs)
+#   3. POST /admin/iam/bootstrap on CredRouter: create first admin user
+#   4. POST /admin/tools/:tenantId on CredRouter: set Brave Search config (if key provided)
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -29,7 +81,6 @@ spec:
       {{- include "kclaw.tolerations" . | nindent 6 }}
       serviceAccountName: kclaw-bootstrap
       initContainers:
-        # Wait for LiteLLM to pass its readiness probe before attempting key generation.
         - name: wait-litellm
           image: curlimages/curl:latest
           command:
@@ -41,7 +92,6 @@ spec:
                 sleep 5
               done
               echo "LiteLLM ready"
-        # Wait for CredRouter to pass its readiness probe.
         - name: wait-credrouter
           image: curlimages/curl:latest
           command:
@@ -55,8 +105,16 @@ spec:
               echo "CredRouter ready"
       containers:
         - name: bootstrap
-          image: curlimages/curl:latest
+          image: alpine/k8s:1.31.4
           env:
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: LITELLM_URL
+              value: "http://litellm.{{ .Release.Namespace }}.svc.cluster.local:4000"
+            - name: CREDROUTER_URL
+              value: "http://credrouter.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: LITELLM_BASE_URL
+              value: "http://litellm.{{ .Release.Namespace }}.svc.cluster.local:4000"
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
@@ -67,22 +125,23 @@ spec:
                 secretKeyRef:
                   name: kclaw-secrets
                   key: ADMIN_TOKEN
-            - name: CREDROUTER_URL
-              value: "http://credrouter.{{ .Release.Namespace }}.svc.cluster.local"
-            - name: LITELLM_URL
-              value: "http://litellm.{{ .Release.Namespace }}.svc.cluster.local:4000"
             - name: ADMIN_EMAIL
               value: {{ required "admin.email is required" .Values.admin.email | quote }}
             - name: ADMIN_NAME
               value: {{ required "admin.name is required" .Values.admin.name | quote }}
-            {{- if .Values.slack.enabled }}
-            - name: TENANT_SLACK
-              value: "true"
+            - name: SLACK_ENABLED
+              value: {{ .Values.slack.enabled | toString | quote }}
+            - name: TELEGRAM_ENABLED
+              value: {{ .Values.telegram.enabled | toString | quote }}
+            - name: BRAVE_SEARCH_API_KEY
+              value: {{ .Values.braveSearch.apiKey | default "" | quote }}
+            {{- if and (eq .Values.llm.provider "bedrock") .Values.llm.bedrock.anthropicFallbackKey }}
+            - name: ANTHROPIC_FALLBACK_KEY
+              value: {{ .Values.llm.bedrock.anthropicFallbackKey | quote }}
             {{- end }}
-            {{- if .Values.telegram.enabled }}
-            - name: TENANT_TELEGRAM
-              value: "true"
-            {{- end }}
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
           command:
             - sh
             - -c
@@ -90,65 +149,95 @@ spec:
               set -e
 
               # ── Step 1: Generate LiteLLM virtual key ──────────────────────────
-              echo "Generating LiteLLM virtual key..."
-              LITELLM_VIRTUAL_KEY=$(curl -sf -X POST "${LITELLM_URL}/key/generate" \
+              echo "==> Generating LiteLLM virtual key..."
+              LITELLM_KEY=$(curl -sf -X POST "${LITELLM_URL}/key/generate" \
                 -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \
                 -H "Content-Type: application/json" \
-                -d '{"key_alias":"main"}' | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+                -d '{"key_alias":"main"}' \
+                | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
 
-              if [ -z "$LITELLM_VIRTUAL_KEY" ]; then
+              if [ -z "$LITELLM_KEY" ]; then
                 echo "ERROR: Failed to generate LiteLLM virtual key"
                 exit 1
               fi
               echo "LiteLLM virtual key generated"
 
-              # Store key via CredRouter admin API for use by tenants.
-              # TODO: confirm the CredRouter admin endpoint for storing the litellm key.
-              # Expected: POST /admin/settings  body: {"key":"litellm_key_main","value":"$LITELLM_VIRTUAL_KEY"}
-              curl -sf -X POST "${CREDROUTER_URL}/admin/settings" \
+              # ── Step 2: Bootstrap CredRouter tenants via kubectl exec ─────────
+              echo "==> Finding CredRouter pod..."
+              CREDROUTER_POD=$(kubectl get pods -n "${NAMESPACE}" \
+                -l app=credrouter \
+                -o jsonpath='{.items[0].metadata.name}')
+
+              if [ -z "$CREDROUTER_POD" ]; then
+                echo "ERROR: No CredRouter pod found"
+                exit 1
+              fi
+              echo "CredRouter pod: ${CREDROUTER_POD}"
+
+              echo "==> Copying bootstrap script to CredRouter pod..."
+              kubectl cp /scripts/bootstrap.mjs \
+                "${NAMESPACE}/${CREDROUTER_POD}:/tmp/bootstrap.mjs"
+
+              echo "==> Running tenant bootstrap inside CredRouter..."
+              kubectl exec -n "${NAMESPACE}" "${CREDROUTER_POD}" -- \
+                env \
+                  LITELLM_KEY="${LITELLM_KEY}" \
+                  LITELLM_BASE_URL="${LITELLM_BASE_URL}" \
+                  SLACK_ENABLED="${SLACK_ENABLED}" \
+                  TELEGRAM_ENABLED="${TELEGRAM_ENABLED}" \
+                  ANTHROPIC_FALLBACK_KEY="${ANTHROPIC_FALLBACK_KEY:-}" \
+                node /tmp/bootstrap.mjs
+
+              kubectl exec -n "${NAMESPACE}" "${CREDROUTER_POD}" -- \
+                rm /tmp/bootstrap.mjs
+
+              # ── Step 3: Create first admin user ───────────────────────────────
+              echo "==> Creating admin user ${ADMIN_EMAIL}..."
+              BOOTSTRAP_RESP=$(curl -sf -X POST "${CREDROUTER_URL}/admin/iam/bootstrap" \
                 -H "Authorization: Bearer ${ADMIN_TOKEN}" \
                 -H "Content-Type: application/json" \
-                -d "{\"key\":\"litellm_key_main\",\"value\":\"${LITELLM_VIRTUAL_KEY}\"}" || \
-                echo "WARN: Could not store litellm key in CredRouter — run bootstrap manually"
+                -d "{\"email\":\"${ADMIN_EMAIL}\",\"name\":\"${ADMIN_NAME}\"}")
 
-              # ── Step 2: Bootstrap CredRouter tenants ─────────────────────────
-              # TODO: CredRouter needs a bootstrap HTTP endpoint or one-shot CLI mode.
-              # Once available, the equivalent of Phase 11 in install.sh goes here.
-              #
-              # Until then, bootstrap manually:
-              #   CREDROUTER_POD=$(kubectl get pods -n kclaw -l app=credrouter -o jsonpath='{.items[0].metadata.name}')
-              #   kubectl cp /path/to/bootstrap.mjs kclaw/${CREDROUTER_POD}:/tmp/bootstrap.mjs
-              #   kubectl exec -n kclaw ${CREDROUTER_POD} -- node /tmp/bootstrap.mjs
-              #
-              # See install.sh Phase 11 for the full bootstrap script.
+              TEMP_PASSWORD=$(echo "${BOOTSTRAP_RESP}" \
+                | grep -o '"tempPassword":"[^"]*"' | cut -d'"' -f4)
 
-              if [ "${TENANT_SLACK}" = "true" ]; then
-                echo "TODO: bootstrap slack-main tenant via CredRouter API"
-              fi
-              if [ "${TENANT_TELEGRAM}" = "true" ]; then
-                echo "TODO: bootstrap telegram-main tenant via CredRouter API"
+              if [ -z "$TEMP_PASSWORD" ]; then
+                echo "WARN: Could not extract temp password from response. Check CredRouter logs."
+                echo "Response: ${BOOTSTRAP_RESP}"
+              else
+                echo "Admin user created. Temporary password: ${TEMP_PASSWORD}"
+                echo "TEMP_PASSWORD=${TEMP_PASSWORD}" >> /tmp/bootstrap-summary
               fi
 
-              # ── Step 3: Create admin user ─────────────────────────────────────
-              # TODO: Admin UI needs an HTTP bootstrap endpoint or the CLI available in this container.
-              # Until then, create the admin user manually:
-              #   kubectl port-forward -n kclaw svc/credrouter 8080:80
-              #   CREDROUTER_URL=http://127.0.0.1:8080 CREDROUTER_ADMIN_TOKEN=<token> \
-              #     npx tsx src/admin/cli.ts iam bootstrap "$ADMIN_EMAIL" --name "$ADMIN_NAME"
-              echo "TODO: create admin user ${ADMIN_EMAIL}"
+              # ── Step 4: Set Brave Search tool config ──────────────────────────
+              if [ -n "${BRAVE_SEARCH_API_KEY}" ]; then
+                echo "==> Setting Brave Search tool config..."
+                for TENANT_ID in \
+                  $([ "${SLACK_ENABLED}" = "true" ]    && echo "slack-main") \
+                  $([ "${TELEGRAM_ENABLED}" = "true" ] && echo "telegram-main"); do
+                  curl -sf -X POST \
+                    "${CREDROUTER_URL}/admin/tools/${TENANT_ID}" \
+                    -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"toolName\":\"brave-search\",\"config\":{\"apiKey\":\"${BRAVE_SEARCH_API_KEY}\"}}"
+                  echo "Brave Search configured for ${TENANT_ID}"
+                done
 
-              echo "Bootstrap complete. Check logs above for any TODOs."
----
-# ServiceAccount for the bootstrap Job — needs no cluster permissions beyond
-# reading Secrets in the release namespace (handled by the pod env injection above).
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: kclaw-bootstrap
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "kclaw.labels" . | nindent 4 }}
-  annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-weight: "5"
-    helm.sh/hook-delete-policy: before-hook-creation
+                # Store as system default for future tenants provisioned via Admin UI
+                curl -sf -X POST "${CREDROUTER_URL}/admin/settings" \
+                  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"key\":\"tool_default_brave-search\",\"value\":\"${BRAVE_SEARCH_API_KEY}\"}" \
+                  || echo "WARN: Could not store brave-search system default"
+              fi
+
+              echo "==> Bootstrap complete."
+              echo ""
+              echo "  Admin email:    ${ADMIN_EMAIL}"
+              [ -n "${TEMP_PASSWORD}" ] && echo "  Temp password:  ${TEMP_PASSWORD}"
+              echo ""
+              echo "Change your password on first login."
+      volumes:
+        - name: scripts
+          configMap:
+            name: kclaw-bootstrap-script
