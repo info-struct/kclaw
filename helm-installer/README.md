@@ -42,6 +42,39 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 
 This provisions storage on whichever node the pod schedules to — which is why the node pin matters.
 
+### Cloud provider notes
+
+KClaw pins all components to a single node (SQLite + hostPath agent workspaces). Multi-node scheduling is an Enterprise Edition feature. Pick any node in your cluster, label it, and set `node:` to its `kubernetes.io/hostname` value.
+
+**EKS**
+```yaml
+storageClass: gp3          # or gp2
+ingress:
+  className: nginx         # install aws-load-balancer-controller or nginx-ingress first
+```
+
+**GKE**
+```yaml
+storageClass: standard-rwo
+ingress:
+  className: nginx         # install nginx-ingress-controller first
+```
+Note: GKE Autopilot does not support hostPath volumes — use a Standard cluster.
+
+**RKE2 / Rancher**
+```yaml
+storageClass: local-path   # available by default on RKE2
+ingress:
+  className: nginx         # or traefik if installed
+```
+
+**k3s**
+```yaml
+storageClass: local-path   # available by default
+ingress:
+  className: traefik       # available by default
+```
+
 ---
 
 ## Quick start
