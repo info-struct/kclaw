@@ -3,10 +3,10 @@ entries:
   kclaw:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T13:51:52.967703022Z"
+    created: "2026-10-16T14:19:20.062890631Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
-    digest: a3f129294c9eeed823ee1a99b27b014b5fbb4fc04364c02e5346ab3f6b79551a
+    digest: b57107ebf046a95fc6a7d38b8a20c60682f2cd5332b2794779d44162b54e642c
     home: https://github.com/info-struct/kclaw
     keywords:
     - claude
@@ -22,7 +22,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T13:51:52.959903174Z"
+    created: "2026-10-16T14:19:20.050055302Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 8cc5c0b5ed82ae47128dacfb32d4b0b0dc92cedd888aa86a092694bc0470710f
@@ -41,7 +41,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T13:51:52.954762699Z"
+    created: "2026-10-16T14:19:20.043072028Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 230b0cb2a52406f0bc30e29174be9cd5a9fe9056d185c71c2e1bdf9c01715d21
@@ -60,7 +60,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T13:51:52.951708114Z"
+    created: "2026-10-16T14:19:20.039813122Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -82,4 +82,4 @@ entries:
     urls:
     - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-16T13:51:52.944696839Z"
+generated: "2026-10-16T14:19:20.031654672Z"
