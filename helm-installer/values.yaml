@@ -35,7 +35,7 @@ llm:
 
   openrouter:
     apiKey: ""
-    model: "google/gemini-flash-1.5"
+    model: "google/gemini-3.8-flash"
 
 # ── Optional integrations ─────────────────────────────────────────────────────
 openai:
