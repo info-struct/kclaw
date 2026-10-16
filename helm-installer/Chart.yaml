@@ -2,7 +2,7 @@ apiVersion: v2
 name: kclaw
 description: KClaw — self-hosted AI assistant platform for existing Kubernetes clusters
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "latest"
 keywords:
   - claude
