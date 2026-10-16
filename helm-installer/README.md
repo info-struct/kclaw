@@ -10,7 +10,7 @@ Deploy KClaw to an **existing Kubernetes cluster** via a single `helm install`.
 
 | Component | What it does |
 |---|---|
-| **PostgreSQL** | Backing store for LiteLLM (Bitnami subchart) |
+| **PostgreSQL** | Backing store for LiteLLM (`postgres:16-alpine` StatefulSet) |
 | **LiteLLM** | Model proxy — routes to Anthropic, Bedrock, or OpenRouter |
 | **CredRouter** | Encrypted credential vault, JWT IAM, per-tenant config |
 | **Orchestrator** | Message routing, agent pod lifecycle, Admin API |
@@ -106,10 +106,11 @@ The `--wait` flag blocks until all deployments and the bootstrap Job complete. F
 kubectl get nodes -o wide | grep <your-node-name>
 ```
 
-Then open `http://<node-ip>` — or the ingress host you configured. Your temp password is printed in the bootstrap Job logs:
+Then open `http://<ingress-host>` (e.g. `http://kclaw-admin-ui.local`) and log in with the email you configured. Your temporary password is stored in the generated secrets:
 
 ```bash
-kubectl logs -n kclaw -l app=kclaw-bootstrap --tail=5
+kubectl get secret -n kclaw kclaw-generated-secrets \
+  -o jsonpath='{.data.admin-password}' | base64 -d
 ```
 
 Change your password on first login.
@@ -162,7 +163,7 @@ llm:
 
   openrouter:
     apiKey: ""
-    model: google/gemini-flash-1.5
+    model: google/gemini-3.8-flash
 ```
 
 ### Optional integrations
@@ -227,18 +228,20 @@ secrets:
 
 Once installed, these are stored in the `kclaw-generated-secrets` Secret in the `kclaw` namespace and reused on every upgrade.
 
-### PostgreSQL subchart
+### PostgreSQL
+
+A minimal `postgres:16-alpine` StatefulSet is included. It pins to the same node as all other KClaw components via `.Values.node`.
 
 ```yaml
 postgresql:
   enabled: true             # set false to bring your own PostgreSQL
+  image: "postgres:16-alpine"
   externalHost: ""          # required if postgresql.enabled is false
-  externalPassword: ""
   auth:
     database: litellm
   primary:
-    nodeSelector:
-      kubernetes.io/hostname: ""   # defaults to .Values.node if blank
+    persistence:
+      size: 5Gi
 ```
 
 ### Image overrides (Enterprise Edition)
@@ -276,14 +279,19 @@ The bootstrap Job only runs on first install (`helm.sh/hook: post-install`). It 
 ```bash
 helm uninstall kclaw --namespace kclaw
 kubectl delete namespace kclaw
-kubectl delete namespace postgresql
 ```
 
-PVCs are not deleted by default. To remove all data:
+PVCs and the generated secrets are not deleted by default (`helm.sh/resource-policy: keep`). To remove all data:
 
 ```bash
 kubectl delete pvc -n kclaw --all
-kubectl delete pvc -n postgresql --all
+kubectl delete secret -n kclaw kclaw-generated-secrets
+```
+
+If using `local-path` storage, the data directory on the node is also not automatically cleaned up:
+
+```bash
+ssh <node> "sudo rm -rf /var/lib/rancher/k3s/storage/pvc-*_kclaw_*"
 ```
 
 ---
@@ -348,7 +356,7 @@ On first install, a post-install Helm hook Job:
 2. Stores the key as a Kubernetes Secret
 3. Connects to CredRouter and initializes the tenant database
 4. Creates the default provider config (pointing at LiteLLM)
-5. Creates the first admin user in the Admin UI
+5. Creates the first admin user — temporary password stored in `kclaw-generated-secrets`
 
 ### LiteLLM
 
@@ -395,7 +403,7 @@ Update `ingress.className` in your values file to match.
 
 | Feature | Status |
 |---|---|
-| PostgreSQL subchart | Done |
+| PostgreSQL StatefulSet (postgres:16-alpine) | Done |
 | Auto-generated secrets | Done |
 | LiteLLM templates | Done |
 | CredRouter / Orchestrator / Admin UI templates | Done |
@@ -403,4 +411,4 @@ Update `ingress.className` in your values file to match.
 | Bootstrap Job (CredRouter tenant init) | Done — `kubectl exec` into CredRouter pod |
 | Bootstrap Job (admin user creation) | Done — `POST /admin/iam/bootstrap` on CredRouter |
 | Bootstrap Job (Brave Search tool config) | Done — `POST /admin/tools/:tenantId` |
-| Published Helm repo | Pending |
+| Published Helm repo | Done — https://info-struct.github.io/kclaw/helm-installer |
