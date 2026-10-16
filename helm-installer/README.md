@@ -75,6 +75,26 @@ ingress:
   className: traefik       # available by default
 ```
 
+### Node sizing
+
+Each agent pod requests 512Mi RAM and 100m CPU. Fixed components (LiteLLM, Orchestrator, CredRouter, Admin UI, PostgreSQL) consume ~1.3Gi combined. For 30 concurrent agents:
+
+```
+30 × 512Mi + 1.3Gi ≈ 16.5Gi memory required
+```
+
+Recommended minimum for 30 agents (64Gi gives comfortable headroom):
+
+| Cloud | Instance | vCPU | RAM | Arch |
+|---|---|---|---|---|
+| AWS | `r8g.2xlarge` | 8 | 64Gi | ARM64 (Graviton4) |
+| AWS | `m7g.4xlarge` | 16 | 64Gi | ARM64 (Graviton3) |
+| AWS | `m7i.4xlarge` | 16 | 64Gi | x86 |
+| GCP | `t2a-standard-16` | 16 | 64Gi | ARM64 (Ampere Altra) |
+| GCP | `n2-highmem-8` | 8 | 64Gi | x86 |
+
+ARM64 instances are recommended — all KClaw images are multi-arch and ARM64 is typically 15-20% cheaper than equivalent x86.
+
 ---
 
 ## Quick start
