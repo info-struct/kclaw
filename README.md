@@ -100,6 +100,21 @@ manually.
 - Orchestrator node selector: `kubernetes.io/hostname` — in the Community edition, agents pin to the same node as the orchestrator for `hostPath` access. Multi-node scheduling is an Enterprise feature.
 - Agent pods run as UID 1000 (Claude CLI refuses `--dangerously-skip-permissions` as root)
 
+### Raspberry Pi — enable cgroups
+
+k3s requires memory cgroups. Raspberry Pi OS does not enable them by default. Before installing, append the following to the end of the single line in `/boot/firmware/cmdline.txt`:
+
+```
+cgroup_enable=memory cgroup_memory=1
+```
+
+Then reboot before running the installer:
+```bash
+sudo reboot
+```
+
+Without this, k3s will start but container memory limits won't apply and agent pods may behave unpredictably.
+
 ## Features
 
 **Native Claude Code Skill Compatibility**
