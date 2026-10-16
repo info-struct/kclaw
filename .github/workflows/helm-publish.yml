@@ -1,0 +1,57 @@
+name: Publish Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm-installer/**'
+      - '!helm-installer/index.yaml'
+      - '!helm-installer/kclaw-*.tgz'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Fetch chart dependencies
+        run: helm dependency update helm-installer/
+
+      - name: Package chart
+        run: helm package helm-installer/ --destination helm-installer/
+
+      - name: Generate index.yaml
+        run: |
+          helm repo index helm-installer/ \
+            --url https://info-struct.github.io/kclaw/helm-installer
+
+      - name: Commit packaged chart and index
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm-installer/kclaw-*.tgz helm-installer/index.yaml
+          git diff --cached --quiet || git commit -m "chore: publish helm chart $(helm show chart helm-installer/ | grep '^version:' | awk '{print $2}')"
+          git push
+
+      - name: Enable GitHub Pages (idempotent)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/pages \
+            --method POST \
+            --field source='{"branch":"main","path":"/"}' \
+            2>/dev/null || echo "Pages already enabled"

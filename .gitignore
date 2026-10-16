@@ -20,3 +20,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Helm dependency cache — bundled into .tgz at publish time; not committed
+helm-installer/charts/

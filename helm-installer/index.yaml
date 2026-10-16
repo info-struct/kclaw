@@ -1,0 +1,28 @@
+apiVersion: v1
+entries:
+  kclaw:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-10-15T18:24:21.537583426-06:00"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.x.x
+    description: KClaw — self-hosted AI assistant platform for existing Kubernetes
+      clusters
+    digest: 207f55c51d19619a6b4c9f028939347fe8e283a1b2262cb5b4a46440e61e4088
+    home: https://github.com/info-struct/kclaw
+    keywords:
+    - claude
+    - ai
+    - assistant
+    - kubernetes
+    maintainers:
+    - name: info-struct
+    name: kclaw
+    type: application
+    urls:
+    - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-10-15T18:24:21.505900417-06:00"

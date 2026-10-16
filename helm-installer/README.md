@@ -62,7 +62,7 @@ kubectl get nodes --show-labels | grep kclaw-node
 ### 2. Add the Helm repo
 
 ```bash
-helm repo add kclaw https://charts.kclaw.io
+helm repo add kclaw https://info-struct.github.io/kclaw/helm-installer
 helm repo update
 ```
 
