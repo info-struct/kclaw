@@ -3,7 +3,26 @@ entries:
   kclaw:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T15:58:32.098583622Z"
+    created: "2026-10-16T16:00:14.450108431Z"
+    description: KClaw — self-hosted AI assistant platform for existing Kubernetes
+      clusters
+    digest: 4f8933ff926b73e1f75cb1f4c6b108f0de6f8b84cbbe107f9b1ffef6d899738e
+    home: https://github.com/info-struct/kclaw
+    keywords:
+    - claude
+    - ai
+    - assistant
+    - kubernetes
+    maintainers:
+    - name: info-struct
+    name: kclaw
+    type: application
+    urls:
+    - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-10-16T16:00:14.449569183Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 5ba3dd0cd06a239d5445374828ba0d880407efea1e89f96de581ad98276f5ea2
@@ -22,7 +41,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T15:58:32.09780267Z"
+    created: "2026-10-16T16:00:14.448946032Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 8cc5c0b5ed82ae47128dacfb32d4b0b0dc92cedd888aa86a092694bc0470710f
@@ -41,7 +60,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T15:58:32.092189402Z"
+    created: "2026-10-16T16:00:14.444690516Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 230b0cb2a52406f0bc30e29174be9cd5a9fe9056d185c71c2e1bdf9c01715d21
@@ -60,7 +79,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-16T15:58:32.088628585Z"
+    created: "2026-10-16T16:00:14.442417577Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -82,4 +101,4 @@ entries:
     urls:
     - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-16T15:58:32.081589248Z"
+generated: "2026-10-16T16:00:14.437661353Z"
