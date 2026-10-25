@@ -222,6 +222,37 @@ llm:
     model: google/gemini-3.8-flash
 ```
 
+### Multi-model routing (OpenRouter)
+
+When using `provider: openrouter`, KClaw automatically registers two models:
+
+| LiteLLM name | Role |
+|---|---|
+| `primary` | Auto-router — delegates to the model below for text, Haiku 4.5 for PDFs/images |
+| `claude-haiku-4-5-20251001` | Document model — handles all PDF and image content |
+
+This means you can use any OpenRouter model as your primary and still get full document support without any extra configuration. The routing is handled transparently by LiteLLM's complexity router — your agents always send `model: primary`.
+
+**Example: DeepSeek V4.1 Flash as primary**
+
+```yaml
+llm:
+  provider: openrouter
+  openrouter:
+    apiKey: "sk-or-v1-..."
+    model: "deepseek/deepseek-v4.1-flash"
+```
+
+Text conversations route to DeepSeek; any message containing a PDF or image automatically routes to Haiku 4.5 — same OpenRouter API key for both.
+
+Other tested primary models:
+
+```yaml
+model: "google/gemini-3.8-flash"      # default
+model: "deepseek/deepseek-v4.1-flash" # cost-efficient, strong at code/reasoning
+model: "anthropic/claude-sonnet-4-6"  # Sonnet via OpenRouter
+```
+
 ### Optional integrations
 
 ```yaml

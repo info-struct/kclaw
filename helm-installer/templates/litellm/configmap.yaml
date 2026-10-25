@@ -32,10 +32,24 @@ data:
           aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
           aws_region_name: os.environ/AWS_REGION_NAME
     {{- else if eq $provider "openrouter" }}
-      - model_name: primary
+      - model_name: openrouter-primary
         litellm_params:
           model: openrouter/{{ .Values.llm.openrouter.model }}
           api_key: os.environ/OPENROUTER_API_KEY
+      - model_name: claude-haiku-4-5-20251001
+        litellm_params:
+          model: openrouter/anthropic/claude-haiku-4-5
+          api_key: os.environ/OPENROUTER_API_KEY
+      - model_name: primary
+        litellm_params:
+          model: auto_router/complexity_router
+          complexity_router_config:
+            tiers:
+              SIMPLE: openrouter-primary
+              COMPLEX: claude-haiku-4-5-20251001
+            modality_routing: true
+            classification_mode: user_turn
+          complexity_router_default_model: openrouter-primary
     {{- end }}
     router_settings:
       routing_strategy: least-busy
