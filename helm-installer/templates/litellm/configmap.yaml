@@ -36,9 +36,9 @@ data:
         litellm_params:
           model: openrouter/{{ .Values.llm.openrouter.model }}
           api_key: os.environ/OPENROUTER_API_KEY
-      - model_name: claude-haiku-4-5-20251001
+      - model_name: openrouter-document
         litellm_params:
-          model: openrouter/anthropic/claude-haiku-4-5
+          model: openrouter/{{ .Values.llm.openrouter.documentModel }}
           api_key: os.environ/OPENROUTER_API_KEY
       - model_name: primary
         litellm_params:
@@ -46,7 +46,7 @@ data:
           complexity_router_config:
             tiers:
               SIMPLE: openrouter-primary
-              COMPLEX: claude-haiku-4-5-20251001
+              COMPLEX: openrouter-document
             modality_routing: true
             classification_mode: user_turn
           complexity_router_default_model: openrouter-primary

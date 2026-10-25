@@ -224,33 +224,52 @@ llm:
 
 ### Multi-model routing (OpenRouter)
 
-When using `provider: openrouter`, KClaw automatically registers two models:
+When using `provider: openrouter`, KClaw configures two models and an auto-router in LiteLLM:
 
-| LiteLLM name | Role |
-|---|---|
-| `primary` | Auto-router — delegates to the model below for text, Haiku 4.5 for PDFs/images |
-| `claude-haiku-4-5-20251001` | Document model — handles all PDF and image content |
+| LiteLLM name | Values field | Role |
+|---|---|---|
+| `openrouter-primary` | `llm.openrouter.model` | Text and general conversation |
+| `openrouter-document` | `llm.openrouter.documentModel` | PDFs, images, and complex tasks |
+| `primary` | _(auto-router)_ | Routes to the above two automatically |
 
-This means you can use any OpenRouter model as your primary and still get full document support without any extra configuration. The routing is handled transparently by LiteLLM's complexity router — your agents always send `model: primary`.
+Agents always send `model: primary` — LiteLLM dispatches to the right model based on message content. Both models use the same `apiKey`.
 
-**Example: DeepSeek V4.1 Flash as primary**
+**Configuration**
 
 ```yaml
 llm:
   provider: openrouter
   openrouter:
     apiKey: "sk-or-v1-..."
-    model: "deepseek/deepseek-v4.1-flash"
+    model: "google/gemini-3.8-flash"            # primary: text and conversation
+    documentModel: "anthropic/claude-haiku-4-5" # secondary: PDFs, images, complex tasks
 ```
 
-Text conversations route to DeepSeek; any message containing a PDF or image automatically routes to Haiku 4.5 — same OpenRouter API key for both.
-
-Other tested primary models:
+Swap either model independently. Examples:
 
 ```yaml
-model: "google/gemini-3.8-flash"      # default
-model: "deepseek/deepseek-v4.1-flash" # cost-efficient, strong at code/reasoning
-model: "anthropic/claude-sonnet-4-6"  # Sonnet via OpenRouter
+# Cost-optimised: DeepSeek for text, Haiku for documents
+model: "deepseek/deepseek-v4.1-flash"
+documentModel: "anthropic/claude-haiku-4-5"
+
+# High quality: Sonnet for text, Opus for complex tasks
+model: "anthropic/claude-sonnet-4-6"
+documentModel: "anthropic/claude-opus-4-5"
+
+# Fully open: Gemini Flash for text, Gemini Pro for documents
+model: "google/gemini-3.8-flash"
+documentModel: "google/gemini-pro-1.5"
+```
+
+**Applying a model change**
+
+```bash
+helm upgrade kclaw kclaw/kclaw \
+  --namespace kclaw \
+  -f my-values.yaml
+
+kubectl rollout restart deployment/litellm -n kclaw
+kubectl rollout status deployment/litellm -n kclaw
 ```
 
 ### Optional integrations

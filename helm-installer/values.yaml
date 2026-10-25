@@ -36,6 +36,7 @@ llm:
   openrouter:
     apiKey: ""
     model: "google/gemini-3.8-flash"
+    documentModel: "anthropic/claude-haiku-4-5"   # handles PDFs, images, and complex tasks
 
 # ── Optional integrations ─────────────────────────────────────────────────────
 openai:
