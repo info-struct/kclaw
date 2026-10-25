@@ -3,10 +3,10 @@ entries:
   kclaw:
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-25T00:16:48.505547015Z"
+    created: "2026-10-25T00:26:11.351634404Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
-    digest: d41c50d7d4924c91c63ae77edc7a090826ce190b26c6d745308b73926d447a20
+    digest: f542430df0c948641b22dcaa5633763fc6739b9dcb7dbee4a7a182e33cc90a97
     home: https://github.com/info-struct/kclaw
     keywords:
     - claude
@@ -22,7 +22,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-25T00:16:48.504464579Z"
+    created: "2026-10-25T00:26:11.350308274Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 5ba3dd0cd06a239d5445374828ba0d880407efea1e89f96de581ad98276f5ea2
@@ -41,7 +41,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-25T00:16:48.503538231Z"
+    created: "2026-10-25T00:26:11.349566619Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 8cc5c0b5ed82ae47128dacfb32d4b0b0dc92cedd888aa86a092694bc0470710f
@@ -60,7 +60,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-25T00:16:48.499129676Z"
+    created: "2026-10-25T00:26:11.344028707Z"
     description: KClaw — self-hosted AI assistant platform for existing Kubernetes
       clusters
     digest: 230b0cb2a52406f0bc30e29174be9cd5a9fe9056d185c71c2e1bdf9c01715d21
@@ -79,7 +79,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-25T00:16:48.496826306Z"
+    created: "2026-10-25T00:26:11.342065655Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -101,4 +101,4 @@ entries:
     urls:
     - https://info-struct.github.io/kclaw/helm-installer/kclaw-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-25T00:16:48.491457202Z"
+generated: "2026-10-25T00:26:11.333902812Z"
