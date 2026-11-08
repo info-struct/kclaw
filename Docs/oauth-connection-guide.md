@@ -88,9 +88,15 @@ redirect URI to `https://<YOUR_KCLAW_HOST>/api/auth/oauth/callback/<slug>`.
 | **Client Secret** | From the provider console (write-only after save) | `GOCSPX-…` |
 | **Redirect URI** | Must exactly match what's registered at the provider. Click **Compute** to auto-fill from current origin + slug. | `https://kclaw.example.com/api/auth/oauth/callback/gmail` |
 | **Scopes** | Space-separated | `https://www.googleapis.com/auth/gmail.modify` |
-| **Env Key Map** | Maps token fields → env var names injected into the agent pod | `refresh_token → GMAIL_REFRESH_TOKEN`, `access_token → GMAIL_ACCESS_TOKEN` |
+| **Env Key Map** | Maps token fields → env var names injected into the agent pod. **For Gmail + gog**: map all four keys so `hydration.ts` can configure gogcli inside the pod (see note below). | `refresh_token → GMAIL_REFRESH_TOKEN,GOOGLE_REFRESH_TOKEN`<br>`access_token → GMAIL_ACCESS_TOKEN,GOOGLE_ACCESS_TOKEN`<br>`client_id → GOOGLE_CLIENT_ID`<br>`client_secret → GOOGLE_CLIENT_SECRET` |
 | **MCP Server Name** | The `mcp_configs` entry that receives these env vars | `gmail` |
 | **Enabled** | Toggle — controls visibility to users | on |
+
+> **Gmail + gog note:** When an agent pod boots, kclaw's `hydration.ts` (`hydrateGoogleCredentials()`)
+> reads `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to configure gogcli headlessly. If either is
+> absent, hydration silently skips gog setup and `gog` commands will fail inside the pod. The built-in
+> Gmail preset (migration 013) populates all four keys automatically — if you're registering Gmail
+> manually, make sure all four are in the envKeyMap as shown above.
 
 4. Click **Add Provider**.
 
@@ -143,6 +149,13 @@ After connecting, confirm the token flows through:
    provider's server name. If it shows **⚠ credentials needed**, the envKeyMap or MCP server
    name is misconfigured — ask an admin to edit the provider.
 3. Start or restart an agent session. The MCP server should initialize without auth errors.
+4. **If using gog:** exec into the agent pod and verify the CLI is wired up:
+   ```bash
+   gog whoami
+   ```
+   If this fails, check that `hydration.ts` ran (look for `[hydration]` lines in pod logs) and that
+   `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are present in the pod environment. If gog prompts for
+   a keyring passphrase, ensure `GOG_KEYRING_PASSWORD` is set in the pod's environment.
 
 ---
 
