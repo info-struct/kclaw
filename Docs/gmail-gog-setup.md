@@ -2,8 +2,6 @@
 
 > ⚠️ **This guide is for local workstation setup only** (IT administrators and business users
 > configuring their own machine).
-> **Web application** client and stores tokens in the CredRouter vault. Mixing the two will
-> cause `redirect_uri_mismatch` errors because Desktop clients reject HTTPS redirect URIs.
 
 > **Generic template.** Replace everything in `<ANGLE_BRACKETS>` with your values.
 > Nothing account-specific is baked in. "Smart defaults" are pre-filled — override only if you
