@@ -2,9 +2,6 @@
 
 > ⚠️ **This guide is for local workstation setup only** (IT administrators and business users
 > configuring their own machine).
-> It uses a **Desktop app** OAuth client with a loopback redirect (`http://127.0.0.1:<PORT>`).
-> If you are setting up Gmail for a **kclaw cluster deployment**, use
-> [`oauth-connection-guide.md`](./oauth-connection-guide.md) instead — that flow uses a
 > **Web application** client and stores tokens in the CredRouter vault. Mixing the two will
 > cause `redirect_uri_mismatch` errors because Desktop clients reject HTTPS redirect URIs.
 
